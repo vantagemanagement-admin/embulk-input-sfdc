@@ -2,10 +2,11 @@
 Gem::Specification.new do |spec|
   spec.name          = "embulk-input-sfdc"
   spec.version       = "0.1.0"
-  spec.authors       = ["yoshihara"]
+  spec.authors       = ["yoshihara", "uu59"]
   spec.summary       = "Sfdc input plugin for Embulk"
   spec.description   = "Loads records from Sfdc."
-  spec.email         = ["h.yoshihara@everyleaf.com"]
+  spec.email         = ["h.yoshihara@everyleaf.com", "k@uu59.org"]
+
   spec.licenses      = ["Apache2"]
   # TODO set this: spec.homepage      = "https://github.com/h.yoshihara/embulk-input-sfdc"
 
