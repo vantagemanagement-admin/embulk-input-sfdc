@@ -1,4 +1,3 @@
-
 Gem::Specification.new do |spec|
   spec.name          = "embulk-input-sfdc"
   spec.version       = "0.0.1"
