@@ -1,7 +1,7 @@
 
 Gem::Specification.new do |spec|
   spec.name          = "embulk-input-sfdc"
-  spec.version       = "0.1.0"
+  spec.version       = "0.0.1"
   spec.authors       = ["yoshihara", "uu59"]
   spec.summary       = "Sfdc input plugin for Embulk"
   spec.description   = "Loads records from Sfdc."
