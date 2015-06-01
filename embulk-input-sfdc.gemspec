@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.summary       = "Sfdc input plugin for Embulk"
   spec.description   = "Loads records from Sfdc."
   spec.email         = ["h.yoshihara@everyleaf.com"]
-  spec.licenses      = ["MIT"]
+  spec.licenses      = ["Apache2"]
   # TODO set this: spec.homepage      = "https://github.com/h.yoshihara/embulk-input-sfdc"
 
   spec.files         = `git ls-files`.split("\n") + Dir["classpath/*.jar"]
