@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["h.yoshihara@everyleaf.com", "k@uu59.org"]
 
   spec.licenses      = ["Apache2"]
-  # TODO set this: spec.homepage      = "https://github.com/h.yoshihara/embulk-input-sfdc"
+  spec.homepage      = "https://github.com/treasure-data/embulk-input-sfdc"
 
   spec.files         = `git ls-files`.split("\n") + Dir["classpath/*.jar"]
   spec.test_files    = spec.files.grep(%r{^(test|spec)/})
