@@ -3,6 +3,8 @@ require "uri"
 
 module Sfdc
   class Api
+    DEFAULT_HEADER = {:Accept => 'application/json; charset=UTF-8'.freeze}.freeze
+
     attr_reader :client
 
     def self.setup(login_url, config)
@@ -49,6 +51,10 @@ module Sfdc
     def get_metadata(sobject_name)
       sobject_metadata = client.get("/sobjects/#{sobject_name}/describe", :Accept => 'application/json; charset=UTF-8')
       JSON.parse(sobject_metadata.body)
+    end
+
+    def search(soql)
+      JSON.parse(client.get("/query/?q=#{soql}", DEFAULT_HEADER).body)
     end
 
     def get(*args)

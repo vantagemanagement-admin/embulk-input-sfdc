@@ -52,19 +52,16 @@ module Embulk
         client = Sfdc::Api.setup(login_url, config)
 
         metadata = client.get_metadata(target)
+
         raise "Target #{target} can't be searched." if !metadata["queryable"] || !metadata["searchable"]
 
         # get objects for guess
+        target_names = metadata["fields"].map {|fields| fields["name"] }
+        soql = "SELECT+#{target_names.join(',')}+FROM+#{target}"
 
-        target_names = metadata["fields"].map do |fields|
-          fields["name"]
-        end
+        sobjects = client.search("#{soql}+limit+5")
 
-        sobjects = client.get("/query/?q=SELECT+#{target_names.join(',')}+from+#{target}+limit+5", :Accept => 'application/json; charset=UTF-8')
-
-        raw_records = JSON.parse(sobjects.body)["records"]
-
-        sample_records = raw_records.map do |record|
+        sample_records = sobjects["records"].map do |record|
           record.reject {|key, _| key == "attributes"}
         end
 
