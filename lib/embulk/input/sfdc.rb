@@ -1,6 +1,7 @@
 require "httpclient"
 require "json"
 require "sfdc/api"
+require "embulk/input/sfdc-input-plugin-utils"
 
 module Embulk
   module Input
@@ -65,8 +66,10 @@ module Embulk
           record.reject {|key, _| key == "attributes"}
         end
 
-        columns = Guess::SchemaGuess.from_hash_records(sample_records)
-        {"soql" => soql, "columns" => columns}
+        {
+          "soql" => soql,
+          "columns" => SfdcInputPluginUtils.guess_columns(sample_records)
+        }
       end
 
       def init
