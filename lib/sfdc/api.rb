@@ -56,9 +56,5 @@ module Sfdc
     def search(soql)
       JSON.parse(client.get("/query/?q=#{soql}", DEFAULT_HEADER).body)
     end
-
-    def get(*args)
-      client.get(*args)
-    end
   end
 end
