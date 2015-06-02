@@ -56,10 +56,9 @@ module Embulk
 
         # get objects for guess
         target_columns = metadata["fields"].map {|fields| fields["name"] }
-        soql = "SELECT+#{target_columns.join(',')}+FROM+#{target}"
+        soql = "SELECT #{target_columns.join(',')} FROM #{target}"
 
-        sobjects = client.search("#{soql}+limit+5")
-
+        sobjects = client.search("#{soql} limit 5")
         sample_records = sobjects["records"].map do |record|
           record.reject {|key, _| key == "attributes"}
         end

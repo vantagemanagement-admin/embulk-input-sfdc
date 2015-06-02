@@ -49,12 +49,12 @@ module Sfdc
     end
 
     def get_metadata(sobject_name)
-      sobject_metadata = client.get("/sobjects/#{sobject_name}/describe", DEFAULT_HEADER)
+      sobject_metadata = client.get("/sobjects/#{sobject_name}/describe", nil, DEFAULT_HEADER)
       JSON.parse(sobject_metadata.body)
     end
 
     def search(soql)
-      JSON.parse(client.get("/query/?q=#{soql}", DEFAULT_HEADER).body)
+      JSON.parse(client.get("/query/", {q: soql}, DEFAULT_HEADER).body)
     end
   end
 end
