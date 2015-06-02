@@ -51,10 +51,7 @@ module Embulk
 
         client = Sfdc::Api.setup(login_url, config)
 
-        # get metadata
-
-        sobject_metadata = client.get("/sobjects/#{target}/describe", :Accept => 'application/json; charset=UTF-8')
-        metadata = JSON.parse(sobject_metadata.body)
+        metadata = client.get_metadata(target)
         raise "Target #{target} can't be searched." if !metadata["queryable"] || !metadata["searchable"]
 
         # get objects for guess

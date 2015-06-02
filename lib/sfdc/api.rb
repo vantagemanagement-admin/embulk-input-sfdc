@@ -46,6 +46,11 @@ module Sfdc
       self
     end
 
+    def get_metadata(sobject_name)
+      sobject_metadata = client.get("/sobjects/#{sobject_name}/describe", :Accept => 'application/json; charset=UTF-8')
+      JSON.parse(sobject_metadata.body)
+    end
+
     def get(*args)
       client.get(*args)
     end
