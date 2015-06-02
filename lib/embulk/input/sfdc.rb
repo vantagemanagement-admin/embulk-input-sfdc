@@ -66,7 +66,7 @@ module Embulk
         end
 
         columns = Guess::SchemaGuess.from_hash_records(sample_records)
-        {"columns" => columns}
+        {"soql" => soql, "columns" => columns}
       end
 
       def init
