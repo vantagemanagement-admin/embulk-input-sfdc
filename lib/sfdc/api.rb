@@ -29,7 +29,7 @@ module Sfdc
         :password => config[:password] + config[:security_token]
       }
 
-      oauth_response = @client.post(@login_url + "services/oauth2/token", params, :Accept => 'application/json; charset=UTF-8')
+      oauth_response = @client.post(@login_url + "services/oauth2/token", params, DEFAULT_HEADER)
       oauth = JSON.parse(oauth_response.body)
 
       client.base_url = oauth["instance_url"]
@@ -49,7 +49,7 @@ module Sfdc
     end
 
     def get_metadata(sobject_name)
-      sobject_metadata = client.get("/sobjects/#{sobject_name}/describe", :Accept => 'application/json; charset=UTF-8')
+      sobject_metadata = client.get("/sobjects/#{sobject_name}/describe", DEFAULT_HEADER)
       JSON.parse(sobject_metadata.body)
     end
 
