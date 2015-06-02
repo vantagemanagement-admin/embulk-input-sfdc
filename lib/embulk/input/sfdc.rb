@@ -57,8 +57,8 @@ module Embulk
         raise "Target #{target} can't be searched." if !metadata["queryable"] || !metadata["searchable"]
 
         # get objects for guess
-        target_names = metadata["fields"].map {|fields| fields["name"] }
-        soql = "SELECT+#{target_names.join(',')}+FROM+#{target}"
+        target_columns = metadata["fields"].map {|fields| fields["name"] }
+        soql = "SELECT+#{target_columns.join(',')}+FROM+#{target}"
 
         sobjects = client.search("#{soql}+limit+5")
 
