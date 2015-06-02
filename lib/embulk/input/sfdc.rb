@@ -1,5 +1,3 @@
-require "httpclient"
-require "json"
 require "sfdc/api"
 require "embulk/input/sfdc-input-plugin-utils"
 
