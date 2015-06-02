@@ -1,3 +1,6 @@
+require "httpclient"
+require "json"
+
 module Embulk
   module Input
 
@@ -27,15 +30,65 @@ module Embulk
         return next_config_diff
       end
 
-      # TODO
-      #def self.guess(config)
-      #  sample_records = [
-      #    {"example"=>"a", "column"=>1, "value"=>0.1},
-      #    {"example"=>"a", "column"=>2, "value"=>0.2},
-      #  ]
-      #  columns = Guess::SchemaGuess.from_hash_records(sample_records)
-      #  return {"columns" => columns}
-      #end
+      def self.guess(config)
+        username = config.param("username", :string)
+        password = config.param("password", :string)
+        login_url = config.param("login_url", :string, default: "https://login.salesforce.com")
+        client_id = config.param("client_id", :string)
+        client_secret = config.param("client_secret", :string)
+        security_token = config.param("security_token", :string)
+        target = config.param("target", :string)
+
+        params = {
+          :grant_type => 'password',
+          :client_id => client_id,
+          :client_secret => client_secret,
+          :username => username,
+          :password => password + security_token
+        }
+        client = HTTPClient.new
+
+        # authentication
+        res = client.post(login_url + "services/oauth2/token", params, :Accept => 'application/json; charset=UTF-8')
+        oauth = JSON.parse(res.body)
+
+        # version取得
+
+        access_token = oauth["access_token"]
+
+        base_url = oauth["instance_url"]
+
+        res = client.get("#{base_url}/services/data")
+        data = JSON.parse(res.body)
+
+        version_url = data.last["url"]
+
+        client.base_url = base_url + version_url # TODO: Use URI.join
+        client.default_header = { 'Authorization' => 'Bearer ' + access_token }
+
+        # get metadata
+
+        sobject_metadata = client.get("/sobjects/#{target}/describe", :Accept => 'application/json; charset=UTF-8')
+        metadata = JSON.parse(sobject_metadata.body)
+        raise "Target #{target} can't be searched." if !metadata["queryable"] || !metadata["searchable"]
+
+        # get objects for guess
+
+        target_names = metadata["fields"].map do |fields|
+          fields["name"]
+        end
+
+        sobjects = client.get("/query/?q=SELECT+#{target_names.join(',')}+from+#{target}+limit+5", :Accept => 'application/json; charset=UTF-8')
+
+        raw_records = JSON.parse(sobjects.body)["records"]
+
+        sample_records = raw_records.map do |record|
+          record.reject {|key, _| key == "attributes"}
+        end
+
+        columns = Guess::SchemaGuess.from_hash_records(sample_records)
+        {"columns" => columns}
+      end
 
       def init
         # initialization code:
