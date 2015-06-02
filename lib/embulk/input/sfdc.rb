@@ -1,5 +1,6 @@
 require "httpclient"
 require "json"
+require "sfdc/api"
 
 module Embulk
   module Input
@@ -39,32 +40,16 @@ module Embulk
         security_token = config.param("security_token", :string)
         target = config.param("target", :string)
 
-        params = {
-          :grant_type => 'password',
-          :client_id => client_id,
-          :client_secret => client_secret,
-          :username => username,
-          :password => password + security_token
+        # Use named parameter or OStruct?
+        config = {
+          client_id: client_id,
+          client_secret: client_secret,
+          username: username,
+          password: password,
+          security_token: security_token
         }
-        client = HTTPClient.new
 
-        # authentication
-        res = client.post(login_url + "services/oauth2/token", params, :Accept => 'application/json; charset=UTF-8')
-        oauth = JSON.parse(res.body)
-
-        # version取得
-
-        access_token = oauth["access_token"]
-
-        base_url = oauth["instance_url"]
-
-        res = client.get("#{base_url}/services/data")
-        data = JSON.parse(res.body)
-
-        version_url = data.last["url"]
-
-        client.base_url = base_url + version_url # TODO: Use URI.join
-        client.default_header = { 'Authorization' => 'Bearer ' + access_token }
+        client = Sfdc::Api.setup(login_url, config)
 
         # get metadata
 
