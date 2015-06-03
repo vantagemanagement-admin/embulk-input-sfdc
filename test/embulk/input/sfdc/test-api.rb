@@ -69,6 +69,22 @@ module Embulk
           assert_equal(metadata, @api.get_metadata("custom__c"))
         end
 
+        def test_search
+          setup_api_stub
+
+          Sfdc::Api.setup(login_url, config)
+
+          hit_object = {"Name" => "object1"}
+          objects = [hit_object, {"Name" => "object2"}]
+          soql = "SELECT name FROM custom__c WHERE Name='object1'"
+
+          mock(@api.client).get("/query", {q: soql}, Sfdc::Api::DEFAULT_HEADER) do |res|
+            mock(res).body { hit_object.to_json }
+          end
+
+          assert_equal(hit_object, @api.search(soql))
+        end
+
         private
 
         def login_url

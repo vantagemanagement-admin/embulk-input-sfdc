@@ -56,7 +56,7 @@ module Embulk
         end
 
         def search(soql)
-          JSON.parse(client.get("/query/", {q: soql}, DEFAULT_HEADER).body)
+          JSON.parse(client.get("/query", {q: soql}, DEFAULT_HEADER).body)
         end
       end
     end
