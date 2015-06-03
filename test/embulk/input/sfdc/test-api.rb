@@ -44,14 +44,14 @@ module Embulk
             mock(res).body do
               [
                 {"label"=>"first", "url"=>"/services/data/v1.0", "version"=>"1.0"},
-                {"label"=>"second", "url"=>"/services/data/v2.0", "version"=>"2.0"}].to_json
+                {"label"=>"second", "url"=>version_url, "version"=>"2.0"}].to_json
             end
           end
 
           access_token = @api.authentication(config)
 
           @api.set_latest_version(access_token)
-          assert_equal("#{instance_url}/services/data/v2.0", @api.client.base_url)
+          assert_equal(instance_url + version_url, @api.client.base_url)
         end
 
         private
@@ -89,6 +89,10 @@ module Embulk
 
         def instance_url
           "https://instance-url.com"
+        end
+
+        def version_url
+          "/services/data/v2.0"
         end
       end
     end
