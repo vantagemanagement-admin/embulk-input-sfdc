@@ -12,4 +12,4 @@ $LOAD_PATH.unshift(test_dir)
 
 ENV["TEST_UNIT_MAX_DIFF_TARGET_STRING_SIZE"] ||= "5000"
 
-exit Test::Unit::AutoRunner.run(true, test_dir)
+exit Test::Unit::AutoRunner.run(true, test_dir, ["--use-color=yes"])
