@@ -54,6 +54,21 @@ module Embulk
           assert_equal(instance_url + version_url, @api.client.base_url)
         end
 
+        def test_get_metadata
+          setup_api_stub
+
+          Sfdc::Api.setup(login_url, config)
+
+          metadata = {"metadata" => "is here"}
+          mock(@api.client).get("/sobjects/custom__c/describe", nil, Sfdc::Api::DEFAULT_HEADER) do |res|
+            mock(res).body do
+              metadata.to_json
+            end
+          end
+
+          assert_equal(metadata, @api.get_metadata("custom__c"))
+        end
+
         private
 
         def login_url
@@ -93,6 +108,14 @@ module Embulk
 
         def version_url
           "/services/data/v2.0"
+        end
+
+        def setup_api_stub
+          stub(Sfdc::Api).setup(login_url, config) do
+            @api.client.base_url = URI.join(instance_url, "/", version_url).to_s
+            @api.client.default_header = { "Authorization" => "Bearer access_token" }
+            @api
+          end
         end
       end
     end
