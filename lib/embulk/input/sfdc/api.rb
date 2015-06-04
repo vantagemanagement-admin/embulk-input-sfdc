@@ -46,7 +46,7 @@ module Embulk
           version_url = JSON.parse(versions_response.body).last["url"]
 
           client.base_url = URI.join(@client.base_url, "/", version_url).to_s
-          client.default_header = { "Authorization" => "Bearer #{access_token}" }
+          client.default_header = {"Authorization" => "Bearer #{access_token}"}
 
           self
         end

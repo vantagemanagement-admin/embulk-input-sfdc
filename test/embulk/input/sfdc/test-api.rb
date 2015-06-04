@@ -129,7 +129,7 @@ module Embulk
         def setup_api_stub
           stub(Sfdc::Api).setup(login_url, config) do
             @api.client.base_url = URI.join(instance_url, "/", version_url).to_s
-            @api.client.default_header = { "Authorization" => "Bearer access_token" }
+            @api.client.default_header = {"Authorization" => "Bearer access_token"}
             @api
           end
         end
