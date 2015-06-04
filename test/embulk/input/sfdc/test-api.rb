@@ -51,7 +51,7 @@ module Embulk
           access_token = @api.authentication(config)
 
           @api.set_latest_version(access_token)
-          assert_equal(URI.join(instance_url, version_url), @api.client.base_url)
+          assert_equal(URI.join(instance_url, version_url).to_s, @api.client.base_url)
         end
 
         def test_get_metadata
