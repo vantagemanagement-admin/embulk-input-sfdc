@@ -4,5 +4,5 @@ task default: :test
 
 desc "Run tests"
 task :test do
-  ruby("test/run-test.rb")
+  ruby("test/run-test.rb", "--use-color=yes")
 end
