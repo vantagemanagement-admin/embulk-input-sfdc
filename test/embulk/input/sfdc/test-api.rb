@@ -10,6 +10,7 @@ module Embulk
 
         def test_initialize
           assert_true(@api.client.is_a?(HTTPClient))
+          assert_equal({Accept: 'application/json; charset=UTF-8'}, @api.client.default_header)
         end
 
         def test_setup
@@ -24,7 +25,7 @@ module Embulk
         def test_authentication
           stub(@api).set_latest_version("access_token") { @api }
 
-          mock(@api.client).post("#{login_url}/services/oauth2/token", params, Sfdc::Api::DEFAULT_HEADER) do |res|
+          mock(@api.client).post("#{login_url}/services/oauth2/token", params) do |res|
             mock(res).body { authentication_response }
           end
 
@@ -60,7 +61,7 @@ module Embulk
           Sfdc::Api.setup(login_url, config)
 
           metadata = {"metadata" => "is here"}
-          mock(@api.client).get("/sobjects/custom__c/describe", nil, Sfdc::Api::DEFAULT_HEADER) do |res|
+          mock(@api.client).get("/sobjects/custom__c/describe", nil) do |res|
             mock(res).body do
               metadata.to_json
             end
@@ -78,7 +79,7 @@ module Embulk
           objects = [hit_object, {"Name" => "object2"}]
           soql = "SELECT name FROM custom__c WHERE Name='object1'"
 
-          mock(@api.client).get("/query", {q: soql}, Sfdc::Api::DEFAULT_HEADER) do |res|
+          mock(@api.client).get("/query", {q: soql}) do |res|
             mock(res).body { hit_object.to_json }
           end
 
@@ -129,7 +130,7 @@ module Embulk
         def setup_api_stub
           stub(Sfdc::Api).setup(login_url, config) do
             @api.client.base_url = URI.join(instance_url, version_url).to_s
-            @api.client.default_header = {"Authorization" => "Bearer access_token"}
+            @api.client.default_header = {Accept: 'application/json; charset=UTF-8', Authorization: "Bearer access_token"}
             @api
           end
         end

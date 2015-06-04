@@ -5,8 +5,7 @@ module Embulk
   module Input
     module Sfdc
       class Api
-        DEFAULT_HEADER = {Accept: 'application/json; charset=UTF-8'.freeze}.freeze
-        DEFAULT_LOGIN_URL = "https://login.salesforce.com"
+        DEFAULT_LOGIN_URL = "https://login.salesforce.com".freeze
 
         attr_reader :client
 
@@ -21,6 +20,7 @@ module Embulk
         def initialize(login_url)
           @login_url = login_url
           @client = HTTPClient.new
+          @client.default_header = {Accept: 'application/json; charset=UTF-8'}
         end
 
         def authentication(config)
@@ -32,7 +32,7 @@ module Embulk
             password: config[:password] + config[:security_token]
           }
 
-          oauth_response = @client.post(@login_url + "/services/oauth2/token", params, DEFAULT_HEADER)
+          oauth_response = @client.post(@login_url + "/services/oauth2/token", params)
           oauth = JSON.parse(oauth_response.body)
 
           client.base_url = oauth["instance_url"]
@@ -46,18 +46,18 @@ module Embulk
           version_url = JSON.parse(versions_response.body).last["url"]
 
           client.base_url = URI.join(@client.base_url, "/", version_url).to_s
-          client.default_header = {"Authorization" => "Bearer #{access_token}"}
+          client.default_header = client.default_header.merge(Authorization: "Bearer #{access_token}")
 
           self
         end
 
         def get_metadata(sobject_name)
-          sobject_metadata = client.get("/sobjects/#{sobject_name}/describe", nil, DEFAULT_HEADER)
+          sobject_metadata = client.get("/sobjects/#{sobject_name}/describe", nil)
           JSON.parse(sobject_metadata.body)
         end
 
         def search(soql)
-          JSON.parse(client.get("/query", {q: soql}, DEFAULT_HEADER).body)
+          JSON.parse(client.get("/query", {q: soql}).body)
         end
       end
     end
