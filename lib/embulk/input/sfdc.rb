@@ -54,7 +54,7 @@ module Embulk
 
         sobjects = client.search("#{soql} limit 5")
         sample_records = sobjects["records"].map do |record|
-          record.reject {|key, _| key == "attributes"}
+          record.reject {|key, _| key == "attributes" }
         end
 
         {
