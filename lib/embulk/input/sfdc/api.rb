@@ -5,7 +5,7 @@ module Embulk
   module Input
     module Sfdc
       class Api
-        DEFAULT_HEADER = {:Accept => 'application/json; charset=UTF-8'.freeze}.freeze
+        DEFAULT_HEADER = {Accept: 'application/json; charset=UTF-8'.freeze}.freeze
         DEFAULT_LOGIN_URL = "https://login.salesforce.com"
 
         attr_reader :client
@@ -25,11 +25,11 @@ module Embulk
 
         def authentication(config)
           params = {
-            :grant_type => 'password',
-            :client_id => config[:client_id],
-            :client_secret => config[:client_secret],
-            :username => config[:username],
-            :password => config[:password] + config[:security_token]
+            grant_type: 'password',
+            client_id: config[:client_id],
+            client_secret: config[:client_secret],
+            username: config[:username],
+            password: config[:password] + config[:security_token]
           }
 
           oauth_response = @client.post(@login_url + "/services/oauth2/token", params, DEFAULT_HEADER)
