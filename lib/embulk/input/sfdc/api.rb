@@ -5,7 +5,8 @@ module Embulk
   module Input
     module Sfdc
       class Api
-        DEFAULT_HEADER = {:Accept => 'application/json; charset=UTF-8'.freeze}.freeze # TODO: add client.default_header
+        DEFAULT_HEADER = {:Accept => 'application/json; charset=UTF-8'.freeze}.freeze
+        DEFAULT_LOGIN_URL = "https://login.salesforce.com"
 
         attr_reader :client
 

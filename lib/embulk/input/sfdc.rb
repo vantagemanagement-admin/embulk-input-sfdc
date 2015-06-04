@@ -31,7 +31,7 @@ module Embulk
       end
 
       def self.guess(config)
-        login_url = config.param("login_url", :string, default: "https://login.salesforce.com")
+        login_url = config.param("login_url", :string, default: Sfdc::Api::DEFAULT_LOGIN_URL)
         target = config.param("target", :string)
 
         config = {
