@@ -1,3 +1,6 @@
+require "embulk/input/sfdc/api"
+require "embulk/input/sfdc-input-plugin-utils"
+
 module Embulk
   module Input
 
@@ -27,15 +30,38 @@ module Embulk
         return next_config_diff
       end
 
-      # TODO
-      #def self.guess(config)
-      #  sample_records = [
-      #    {"example"=>"a", "column"=>1, "value"=>0.1},
-      #    {"example"=>"a", "column"=>2, "value"=>0.2},
-      #  ]
-      #  columns = Guess::SchemaGuess.from_hash_records(sample_records)
-      #  return {"columns" => columns}
-      #end
+      def self.guess(config)
+        login_url = config.param("login_url", :string, default: Sfdc::Api::DEFAULT_LOGIN_URL)
+        target = config.param("target", :string)
+
+        config = {
+          client_id: config.param("client_id", :string),
+          client_secret: config.param("client_secret", :string),
+          username: config.param("username", :string),
+          password: config.param("password", :string),
+          security_token: config.param("security_token", :string),
+        }
+
+        client = Sfdc::Api.setup(login_url, config)
+
+        metadata = client.get_metadata(target)
+
+        raise "Target #{target} can't be searched." if !metadata["queryable"] || !metadata["searchable"]
+
+        # get objects for guess
+        target_columns = metadata["fields"].map {|fields| fields["name"] }
+        soql = "SELECT #{target_columns.join(',')} FROM #{target}"
+
+        sobjects = client.search("#{soql} limit 5")
+        sample_records = sobjects["records"].map do |record|
+          record.reject {|key, _| key == "attributes" }
+        end
+
+        {
+          "soql" => soql,
+          "columns" => SfdcInputPluginUtils.guess_columns(sample_records)
+        }
+      end
 
       def init
         # initialization code:
