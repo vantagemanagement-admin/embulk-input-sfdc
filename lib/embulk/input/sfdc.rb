@@ -31,21 +31,15 @@ module Embulk
       end
 
       def self.guess(config)
-        username = config.param("username", :string)
-        password = config.param("password", :string)
         login_url = config.param("login_url", :string, default: "https://login.salesforce.com")
-        client_id = config.param("client_id", :string)
-        client_secret = config.param("client_secret", :string)
-        security_token = config.param("security_token", :string)
         target = config.param("target", :string)
 
-        # Use named parameter or OStruct?
         config = {
-          client_id: client_id,
-          client_secret: client_secret,
-          username: username,
-          password: password,
-          security_token: security_token
+          client_id: config.param("client_id", :string),
+          client_secret: config.param("client_secret", :string),
+          username: config.param("username", :string),
+          password: config.param("password", :string),
+          security_token: config.param("security_token", :string),
         }
 
         client = Sfdc::Api.setup(login_url, config)
