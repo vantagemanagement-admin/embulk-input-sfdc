@@ -19,7 +19,7 @@ module Embulk
             mock(klass).set_latest_version("access_token") { klass }
           end
 
-          assert_true(Sfdc::Api.setup("login_url", config).instance_of?(Sfdc::Api))
+          assert_true(Sfdc::Api.setup(login_url, config).instance_of?(Sfdc::Api))
         end
 
         def test_authentication
