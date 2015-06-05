@@ -64,9 +64,7 @@ module Embulk
         soql = "SELECT #{target_columns.join(',')} FROM #{target}"
 
         sobjects = client.search("#{soql} limit 5")
-        sample_records = sobjects["records"].map do |record|
-          record.reject {|key, _| key == "attributes" }
-        end
+        sample_records = SfdcInputPluginUtils.extract_records(sobjects["records"])
 
         {
           "soql" => soql,
