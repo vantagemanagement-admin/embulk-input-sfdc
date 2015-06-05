@@ -8,17 +8,28 @@ module Embulk
       Plugin.register_input("sfdc", self)
 
       def self.transaction(config, &control)
-        # configuration code:
-        task = {
-          "property1" => config.param("property1", :string),
-          "property2" => config.param("property2", :integer, default: 0),
+        task = {}
+
+        task[:login_url] = config.param("login_url", :string, default: Sfdc::Api::DEFAULT_LOGIN_URL)
+        task[:soql] = config.param("soql", :string)
+
+        task[:config] = {
+          client_id: config.param("client_id", :string),
+          client_secret: config.param("client_secret", :string),
+          username: config.param("username", :string),
+          password: config.param("password", :string),
+          security_token: config.param("security_token", :string),
         }
 
-        columns = [
-          Column.new(0, "example", :string),
-          Column.new(1, "column", :long),
-          Column.new(2, "value", :double),
-        ]
+        task[:schema] = config.param("columns", :array)
+        columns = []
+
+        task[:schema].each do |column|
+          name = column["name"]
+          type = column["type"].to_sym
+
+          columns << Column.new(nil, name, type, column["format"])
+        end
 
         resume(task, columns, 1, &control)
       end
@@ -64,20 +75,46 @@ module Embulk
       end
 
       def init
-        # initialization code:
-        @property1 = task["property1"]
-        @property2 = task["property2"]
+        # NOTE: At #init, we use Symbol as each key for task (Hash),
+        #       but here, task has them as String...:(
+        config = {}
+        task["config"].each {|key, value| config[key.to_sym] = value }
+
+        @api = Sfdc::Api.setup(task["login_url"], config)
+        @schema = task["schema"]
+        @soql = task["soql"]
       end
 
       def run
-        page_builder.add(["example-value", 1, 0.1])
-        page_builder.add(["example-value", 2, 0.2])
+        response = @api.search(@soql)
+        add_records(page_builder, response["records"])
+
+        while !response["done"] do
+          next_url = response["nextRecordsUrl"]
+          response = @api.get(next_url)
+
+          add_records(page_builder, response["records"])
+        end
+
         page_builder.finish
 
         commit_report = {}
         return commit_report
       end
-    end
 
+      private
+
+      def add_records(page_builder, records)
+        records = SfdcInputPluginUtils.extract_records(records)
+
+        records.each do |record|
+          values = @schema.collect do |column|
+            SfdcInputPluginUtils.cast(record[column["name"]], column["type"])
+          end
+
+          page_builder.add(values)
+        end
+      end
+    end
   end
 end
