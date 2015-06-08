@@ -73,12 +73,7 @@ module Embulk
       end
 
       def init
-        # NOTE: At #init, we use Symbol as each key for task (Hash),
-        #       but here, task has them as String...:(
-        config = {}
-        task["config"].each {|key, value| config[key.to_sym] = value }
-
-        @api = Sfdc::Api.setup(task["login_url"], config)
+        @api = Sfdc::Api.setup(task["login_url"], task["config"])
         @schema = task["schema"]
         @soql = task["soql"]
       end

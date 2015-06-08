@@ -24,7 +24,14 @@ module Embulk
           @client.default_header = {Accept: 'application/json; charset=UTF-8'}
         end
 
-        def authentication(config)
+        def authentication(_config)
+          # NOTE: At SfdcInputPlugin#init, we use Symbol as each key
+          #       for task (Hash), but at SfdcInputPlugin#run, task
+          #       has them as String...:(
+          #       So, I translate keys from String to Symbol
+          config = {}
+          _config.each { |key, value| config[key.to_sym] = value }
+
           params = {
             grant_type: 'password',
             client_id: config[:client_id],
