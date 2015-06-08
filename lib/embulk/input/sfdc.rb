@@ -82,12 +82,7 @@ module Embulk
         response = @api.search(@soql)
         add_records(page_builder, response["records"])
 
-        while !response["done"] do
-          next_url = response["nextRecordsUrl"]
-          response = @api.get(next_url)
-
-          add_records(page_builder, response["records"])
-        end
+        add_next_records(response)
 
         page_builder.finish
 
@@ -96,6 +91,16 @@ module Embulk
       end
 
       private
+
+      def add_next_records(response)
+        return if response["done"]
+        next_url = response["nextRecordsUrl"]
+        response = @api.get(next_url)
+
+        add_records(page_builder, response["records"])
+
+        add_next_records(response)
+      end
 
       def add_records(page_builder, records)
         records = SfdcInputPluginUtils.extract_records(records)
