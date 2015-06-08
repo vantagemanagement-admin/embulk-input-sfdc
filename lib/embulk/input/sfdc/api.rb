@@ -1,5 +1,5 @@
 require "httpclient"
-require "uri"
+require "pathname"
 
 module Embulk
   module Input
@@ -19,11 +19,19 @@ module Embulk
 
         def initialize(login_url)
           @login_url = login_url
+          @version_url = "" # TODO: rename to version_path
           @client = HTTPClient.new
           @client.default_header = {Accept: 'application/json; charset=UTF-8'}
         end
 
-        def authentication(config)
+        def authentication(_config)
+          # NOTE: At SfdcInputPlugin#init, we use Symbol as each key
+          #       for task (Hash), but at SfdcInputPlugin#run, task
+          #       has them as String...:(
+          #       So, I translate keys from String to Symbol
+          config = {}
+          _config.each { |key, value| config[key.to_sym] = value }
+
           params = {
             grant_type: 'password',
             client_id: config[:client_id],
@@ -43,21 +51,26 @@ module Embulk
         def set_latest_version(access_token)
           versions_response = @client.get("/services/data")
           # Use latest version always
-          version_url = JSON.parse(versions_response.body).last["url"]
+          @version_url = Pathname.new(JSON.parse(versions_response.body).last["url"])
 
-          client.base_url = URI.join(@client.base_url, "/", version_url).to_s
           client.default_header = client.default_header.merge(Authorization: "Bearer #{access_token}")
 
           self
         end
 
+        def get(path, parameters={})
+          # TODO: Use this method by #get_metadata and #search
+          # TODO: error handling
+          JSON.parse(client.get(path, parameters).body)
+        end
+
         def get_metadata(sobject_name)
-          sobject_metadata = client.get("/sobjects/#{sobject_name}/describe", nil)
+          sobject_metadata = client.get(@version_url.join("sobjects/#{sobject_name}/describe").to_s)
           JSON.parse(sobject_metadata.body)
         end
 
         def search(soql)
-          JSON.parse(client.get("/query", {q: soql}).body)
+          JSON.parse(client.get(@version_url.join("query").to_s, {q: soql}).body)
         end
       end
     end

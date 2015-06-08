@@ -14,6 +14,31 @@ module Embulk
           column
         end
       end
+
+      # NOTE: Force.com query API returns JSON including
+      #       sobject name (a.k.a "attributes") and record data.
+      def self.extract_records(json)
+        json.map do |elements|
+          elements.reject {|key, _| key == "attributes" }
+        end
+      end
+
+      def self.cast(value, type)
+        return value if value.nil?
+
+        case type.to_sym
+        when :long
+          Integer(value)
+        when :double
+          Float(value)
+        when :timestamp
+          Time.parse(value)
+        when :boolean
+          !!value
+        else
+          value.to_s
+        end
+      end
     end
   end
 end
