@@ -8,7 +8,7 @@ module Embulk
         @api = Sfdc::Api.new(login_url)
         mock(Sfdc::Api).setup(login_url, config) do
           @api.client.base_url = instance_url
-          @api.instance_variable_set(:@version_url, version_url)
+          @api.instance_variable_set(:@version_path, version_path)
           @api.client.default_header = {Accept: 'application/json; charset=UTF-8', Authorization: "Bearer access_token"}
           @api
         end
@@ -79,7 +79,7 @@ module Embulk
         "https://instance-url.com"
       end
 
-      def version_url
+      def version_path
         Pathname.new("/services/data/v2.0")
       end
 
@@ -92,7 +92,7 @@ module Embulk
           {
             "attributes" => {
               "type" => "manyo__c",
-              "url" => "#{version_url.to_s}/sobjects/manyo__c/a002800000#{i}prfUAAQ"
+              "url" => "#{version_path.to_s}/sobjects/manyo__c/a002800000#{i}prfUAAQ"
             }
           }.merge(records)
         end

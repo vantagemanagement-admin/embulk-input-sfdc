@@ -45,7 +45,7 @@ module Embulk
             mock(res).body do
               [
                 {"label"=>"first", "url"=>"/services/data/v1.0", "version"=>"1.0"},
-                {"label"=>"second", "url"=>version_url, "version"=>"2.0"}].to_json
+                {"label"=>"second", "url"=>version_path, "version"=>"2.0"}].to_json
             end
           end
 
@@ -53,7 +53,7 @@ module Embulk
 
           @api.set_latest_version(access_token)
           assert_equal(instance_url, @api.client.base_url)
-          assert_equal(version_url, @api.instance_variable_get(:@version_url))
+          assert_equal(version_path, @api.instance_variable_get(:@version_path))
         end
 
         def test_get_metadata
@@ -62,7 +62,7 @@ module Embulk
           Sfdc::Api.setup(login_url, config)
 
           metadata = {"metadata" => "is here"}
-          mock(@api.client).get(version_url.join("sobjects/custom__c/describe").to_s) do |res|
+          mock(@api.client).get(version_path.join("sobjects/custom__c/describe").to_s) do |res|
             mock(res).body do
               metadata.to_json
             end
@@ -80,7 +80,7 @@ module Embulk
           objects = [hit_object, {"Name" => "object2"}]
           soql = "SELECT name FROM custom__c WHERE Name='object1'"
 
-          mock(@api.client).get(version_url.join("query").to_s, {q: soql}) do |res|
+          mock(@api.client).get(version_path.join("query").to_s, {q: soql}) do |res|
             mock(res).body { hit_object.to_json }
           end
 
@@ -154,14 +154,14 @@ module Embulk
           "https://instance-url.com"
         end
 
-        def version_url
+        def version_path
           Pathname.new("/services/data/v2.0")
         end
 
         def setup_api_stub
           stub(Sfdc::Api).setup(login_url, config) do
             @api.client.base_url = instance_url
-            @api.instance_variable_set(:@version_url, version_url)
+            @api.instance_variable_set(:@version_path, version_path)
             @api.client.default_header = {Accept: 'application/json; charset=UTF-8', Authorization: "Bearer access_token"}
             @api
           end
