@@ -14,7 +14,7 @@ module Embulk
         end
 
         class SetupTest < self
-          def test_setup
+          def test_returning_value
             any_instance_of(Sfdc::Api) do |klass|
               mock(klass).authentication(login_url, config) { "access_token" }
               mock(klass).set_latest_version("access_token") { klass }
@@ -25,7 +25,7 @@ module Embulk
             assert_true(Sfdc::Api.new.setup(login_url, config).instance_of?(Sfdc::Api))
           end
 
-          def test_authentication
+          def test_instance_url
             mock(@api.client).post("#{login_url}/services/oauth2/token", params) do |res|
               mock(res).body { authentication_response }
             end
@@ -36,7 +36,7 @@ module Embulk
             assert_equal(instance_url, @api.client.base_url)
           end
 
-          def test_set_latest_version
+          def test_version_path
             stub(@api).authentication(login_url, config) do
               @api.client.base_url = instance_url
               "access_token"
