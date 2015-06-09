@@ -13,6 +13,7 @@ module Embulk
           assert_equal({Accept: 'application/json; charset=UTF-8'}, @api.client.default_header)
         end
 
+        class SetupTest < self
         def test_setup
           any_instance_of(Sfdc::Api) do |klass|
             mock(klass).authentication(login_url, config) { "access_token" }
@@ -54,6 +55,7 @@ module Embulk
           @api.__send__(:set_latest_version, access_token)
           assert_equal(instance_url, @api.client.base_url)
           assert_equal(version_path, @api.instance_variable_get(:@version_path))
+        end
         end
 
         def test_get_metadata
