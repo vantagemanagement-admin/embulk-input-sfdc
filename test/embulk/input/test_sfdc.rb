@@ -1,4 +1,4 @@
-require "prepare-embulk"
+require "prepare_embulk"
 require "embulk/input/sfdc"
 
 module Embulk
