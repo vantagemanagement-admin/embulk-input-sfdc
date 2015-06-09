@@ -15,14 +15,10 @@ module Embulk
 
         class SetupTest < self
           def test_returning_value
-            any_instance_of(Sfdc::Api) do |klass|
-              mock(klass).authentication(login_url, config) { "access_token" }
-              mock(klass).set_latest_version("access_token") { klass }
-            end
+            mock(@api).authentication(login_url, config) { "access_token" }
+            mock(@api).set_latest_version("access_token") { @api }
 
-            @api.setup(login_url, config)
-
-            assert_true(Sfdc::Api.new.setup(login_url, config).instance_of?(Sfdc::Api))
+            assert_true(@api.setup(login_url, config).instance_of?(Sfdc::Api))
           end
 
           def test_instance_url
