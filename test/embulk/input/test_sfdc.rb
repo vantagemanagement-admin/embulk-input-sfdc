@@ -6,8 +6,8 @@ module Embulk
     class SfdcInputPluginTest < Test::Unit::TestCase
       def test_run
         any_instance_of(Sfdc::Api) do |klass|
-          mock(klass).setup(config) do
-            api = Sfdc::Api.new(login_url)
+          mock(klass).setup(login_url, config) do
+            api = Sfdc::Api.new
             api.client.base_url = instance_url
             api.instance_variable_set(:@version_path, version_path)
             api.client.default_header = {Accept: 'application/json; charset=UTF-8', Authorization: "Bearer access_token"}

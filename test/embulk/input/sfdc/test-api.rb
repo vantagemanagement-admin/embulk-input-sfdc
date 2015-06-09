@@ -5,7 +5,7 @@ module Embulk
     module Sfdc
       class ApiTest < Test::Unit::TestCase
         def setup
-          @api = Sfdc::Api.new(login_url)
+          @api = Sfdc::Api.new
         end
 
         def test_initialize
@@ -15,11 +15,11 @@ module Embulk
 
         def test_setup
           any_instance_of(Sfdc::Api) do |klass|
-            mock(klass).authentication(config) { "access_token" }
+            mock(klass).authentication(login_url, config) { "access_token" }
             mock(klass).set_latest_version("access_token") { klass }
           end
 
-          assert_true(Sfdc::Api.new(login_url).setup(config).instance_of?(Sfdc::Api))
+          assert_true(Sfdc::Api.new.setup(login_url, config).instance_of?(Sfdc::Api))
         end
 
         def test_authentication
@@ -29,14 +29,14 @@ module Embulk
             mock(res).body { authentication_response }
           end
 
-          access_token = @api.authentication(config)
+          access_token = @api.authentication(login_url, config)
 
           assert_equal("access_token", access_token)
           assert_equal(instance_url, @api.client.base_url)
         end
 
         def test_set_latest_version
-          stub(@api).authentication(config) do
+          stub(@api).authentication(login_url, config) do
             @api.client.base_url = instance_url
             "access_token"
           end
@@ -49,7 +49,7 @@ module Embulk
             end
           end
 
-          access_token = @api.authentication(config)
+          access_token = @api.authentication(login_url, config)
 
           @api.set_latest_version(access_token)
           assert_equal(instance_url, @api.client.base_url)
@@ -59,7 +59,7 @@ module Embulk
         def test_get_metadata
           setup_api_stub
 
-          @api.setup(config)
+          @api.setup(login_url, config)
 
           metadata = {"metadata" => "is here"}
           mock(@api.client).get(version_path.join("sobjects/custom__c/describe").to_s) do |res|
@@ -74,7 +74,7 @@ module Embulk
         def test_search
           setup_api_stub
 
-          @api.setup(config)
+          @api.setup(login_url, config)
 
           hit_object = {"Name" => "object1"}
           objects = [hit_object, {"Name" => "object2"}]
@@ -159,7 +159,7 @@ module Embulk
         end
 
         def setup_api_stub
-          stub(@api).setup(config) do
+          stub(@api).setup(login_url, config) do
             @api.client.base_url = instance_url
             @api.instance_variable_set(:@version_path, version_path)
             @api.client.default_header = {Accept: 'application/json; charset=UTF-8', Authorization: "Bearer access_token"}

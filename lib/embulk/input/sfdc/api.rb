@@ -9,20 +9,20 @@ module Embulk
 
         attr_reader :client
 
-        def setup(config)
-          token = authentication(config)
+        def setup(login_url, config)
+          token = authentication(login_url, config)
           set_latest_version(token)
           self
         end
 
-        def initialize(login_url)
-          @login_url = login_url
+        def initialize
+          @login_url = ""
           @version_path = ""
           @client = HTTPClient.new
           @client.default_header = {Accept: 'application/json; charset=UTF-8'}
         end
 
-        def authentication(_config)
+        def authentication(login_url, _config)
           # NOTE: At SfdcInputPlugin#init, we use Symbol as each key
           #       for task (Hash), but at SfdcInputPlugin#run, task
           #       has them as String...:(
@@ -38,7 +38,7 @@ module Embulk
             password: config[:password] + config[:security_token]
           }
 
-          oauth_response = @client.post(@login_url + "/services/oauth2/token", params)
+          oauth_response = @client.post(login_url + "/services/oauth2/token", params)
           oauth = JSON.parse(oauth_response.body)
 
           client.base_url = oauth["instance_url"]
