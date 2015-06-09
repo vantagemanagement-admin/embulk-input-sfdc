@@ -1,5 +1,5 @@
 require "prepare-embulk"
-require "embulk/input/sfdc-input-plugin-utils"
+require "embulk/input/sfdc_input_plugin_utils"
 
 class EmbulkInputPluginUtilsTest < Test::Unit::TestCase
   def test_guess_columns

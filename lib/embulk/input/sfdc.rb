@@ -1,5 +1,5 @@
 require "embulk/input/sfdc/api"
-require "embulk/input/sfdc-input-plugin-utils"
+require "embulk/input/sfdc_input_plugin_utils"
 
 module Embulk
   module Input
