@@ -29,7 +29,7 @@ module Embulk
             mock(res).body { authentication_response }
           end
 
-          access_token = @api.authentication(login_url, config)
+          access_token = @api.__send__(:authentication, login_url, config)
 
           assert_equal("access_token", access_token)
           assert_equal(instance_url, @api.client.base_url)
@@ -51,7 +51,7 @@ module Embulk
 
           access_token = @api.authentication(login_url, config)
 
-          @api.set_latest_version(access_token)
+          @api.__send__(:set_latest_version, access_token)
           assert_equal(instance_url, @api.client.base_url)
           assert_equal(version_path, @api.instance_variable_get(:@version_path))
         end

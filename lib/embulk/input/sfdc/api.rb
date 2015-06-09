@@ -22,6 +22,23 @@ module Embulk
           @client.default_header = {Accept: 'application/json; charset=UTF-8'}
         end
 
+        def get(path, parameters={})
+          # TODO: Use this method by #get_metadata and #search
+          # TODO: error handling
+          JSON.parse(client.get(path, parameters).body)
+        end
+
+        def get_metadata(sobject_name)
+          sobject_metadata = client.get(@version_path.join("sobjects/#{sobject_name}/describe").to_s)
+          JSON.parse(sobject_metadata.body)
+        end
+
+        def search(soql)
+          JSON.parse(client.get(@version_path.join("query").to_s, {q: soql}).body)
+        end
+
+        private
+
         def authentication(login_url, _config)
           # NOTE: At SfdcInputPlugin#init, we use Symbol as each key
           #       for task (Hash), but at SfdcInputPlugin#run, task
@@ -54,21 +71,6 @@ module Embulk
           client.default_header = client.default_header.merge(Authorization: "Bearer #{access_token}")
 
           self
-        end
-
-        def get(path, parameters={})
-          # TODO: Use this method by #get_metadata and #search
-          # TODO: error handling
-          JSON.parse(client.get(path, parameters).body)
-        end
-
-        def get_metadata(sobject_name)
-          sobject_metadata = client.get(@version_path.join("sobjects/#{sobject_name}/describe").to_s)
-          JSON.parse(sobject_metadata.body)
-        end
-
-        def search(soql)
-          JSON.parse(client.get(@version_path.join("query").to_s, {q: soql}).body)
         end
       end
     end
