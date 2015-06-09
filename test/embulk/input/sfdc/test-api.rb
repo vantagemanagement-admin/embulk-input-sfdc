@@ -29,9 +29,8 @@ module Embulk
           end
           mock(@api).set_latest_version("access_token") { @api }
 
-          access_token = @api.setup(login_url, config)
+          @api.setup(login_url, config)
 
-          assert_equal("access_token", access_token)
           assert_equal(instance_url, @api.client.base_url)
         end
 
