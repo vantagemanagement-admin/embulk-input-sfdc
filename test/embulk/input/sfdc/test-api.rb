@@ -14,45 +14,47 @@ module Embulk
         end
 
         class SetupTest < self
-        def test_setup
-          any_instance_of(Sfdc::Api) do |klass|
-            mock(klass).authentication(login_url, config) { "access_token" }
-            mock(klass).set_latest_version("access_token") { klass }
-          end
-
-          assert_true(Sfdc::Api.new.setup(login_url, config).instance_of?(Sfdc::Api))
-        end
-
-        def test_authentication
-          mock(@api.client).post("#{login_url}/services/oauth2/token", params) do |res|
-            mock(res).body { authentication_response }
-          end
-          mock(@api).set_latest_version("access_token") { @api }
-
-          @api.setup(login_url, config)
-
-          assert_equal(instance_url, @api.client.base_url)
-        end
-
-        def test_set_latest_version
-          stub(@api).authentication(login_url, config) do
-            @api.client.base_url = instance_url
-            "access_token"
-          end
-
-          mock(@api.client).get("/services/data") do |res|
-            mock(res).body do
-              [
-                {"label"=>"first", "url"=>"/services/data/v1.0", "version"=>"1.0"},
-                {"label"=>"second", "url"=>version_path, "version"=>"2.0"}].to_json
+          def test_setup
+            any_instance_of(Sfdc::Api) do |klass|
+              mock(klass).authentication(login_url, config) { "access_token" }
+              mock(klass).set_latest_version("access_token") { klass }
             end
+
+            @api.setup(login_url, config)
+
+            assert_true(Sfdc::Api.new.setup(login_url, config).instance_of?(Sfdc::Api))
           end
 
-          @api.setup(login_url, config)
+          def test_authentication
+            mock(@api.client).post("#{login_url}/services/oauth2/token", params) do |res|
+              mock(res).body { authentication_response }
+            end
+            mock(@api).set_latest_version("access_token") { @api }
 
-          assert_equal(instance_url, @api.client.base_url)
-          assert_equal(version_path, @api.instance_variable_get(:@version_path))
-        end
+            @api.setup(login_url, config)
+
+            assert_equal(instance_url, @api.client.base_url)
+          end
+
+          def test_set_latest_version
+            stub(@api).authentication(login_url, config) do
+              @api.client.base_url = instance_url
+              "access_token"
+            end
+
+            mock(@api.client).get("/services/data") do |res|
+              mock(res).body do
+                [
+                  {"label"=>"first", "url"=>"/services/data/v1.0", "version"=>"1.0"},
+                  {"label"=>"second", "url"=>version_path, "version"=>"2.0"}].to_json
+              end
+            end
+
+            @api.setup(login_url, config)
+
+            assert_equal(instance_url, @api.client.base_url)
+            assert_equal(version_path, @api.instance_variable_get(:@version_path))
+          end
         end
 
         def test_get_metadata
