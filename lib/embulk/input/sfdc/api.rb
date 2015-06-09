@@ -19,7 +19,7 @@ module Embulk
 
         def initialize(login_url)
           @login_url = login_url
-          @version_url = "" # TODO: rename to version_path
+          @version_path = ""
           @client = HTTPClient.new
           @client.default_header = {Accept: 'application/json; charset=UTF-8'}
         end
@@ -51,7 +51,7 @@ module Embulk
         def set_latest_version(access_token)
           versions_response = @client.get("/services/data")
           # Use latest version always
-          @version_url = Pathname.new(JSON.parse(versions_response.body).last["url"])
+          @version_path = Pathname.new(JSON.parse(versions_response.body).last["url"])
 
           client.default_header = client.default_header.merge(Authorization: "Bearer #{access_token}")
 
@@ -65,12 +65,12 @@ module Embulk
         end
 
         def get_metadata(sobject_name)
-          sobject_metadata = client.get(@version_url.join("sobjects/#{sobject_name}/describe").to_s)
+          sobject_metadata = client.get(@version_path.join("sobjects/#{sobject_name}/describe").to_s)
           JSON.parse(sobject_metadata.body)
         end
 
         def search(soql)
-          JSON.parse(client.get(@version_url.join("query").to_s, {q: soql}).body)
+          JSON.parse(client.get(@version_path.join("query").to_s, {q: soql}).body)
         end
       end
     end
