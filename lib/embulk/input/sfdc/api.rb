@@ -16,7 +16,6 @@ module Embulk
         end
 
         def initialize
-          @login_url = ""
           @version_path = ""
           @client = HTTPClient.new
           @client.default_header = {Accept: 'application/json; charset=UTF-8'}
