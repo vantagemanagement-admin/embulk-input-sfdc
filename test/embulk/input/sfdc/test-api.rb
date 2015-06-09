@@ -52,7 +52,6 @@ module Embulk
 
             @api.setup(login_url, config)
 
-            assert_equal(instance_url, @api.client.base_url)
             assert_equal(version_path, @api.instance_variable_get(:@version_path))
           end
         end
