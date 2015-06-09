@@ -19,7 +19,7 @@ module Embulk
             mock(klass).set_latest_version("access_token") { klass }
           end
 
-          assert_true(Sfdc::Api.setup(login_url, config).instance_of?(Sfdc::Api))
+          assert_true(Sfdc::Api.new(login_url).setup(config).instance_of?(Sfdc::Api))
         end
 
         def test_authentication
@@ -59,7 +59,7 @@ module Embulk
         def test_get_metadata
           setup_api_stub
 
-          Sfdc::Api.setup(login_url, config)
+          @api.setup(config)
 
           metadata = {"metadata" => "is here"}
           mock(@api.client).get(version_path.join("sobjects/custom__c/describe").to_s) do |res|
@@ -74,7 +74,7 @@ module Embulk
         def test_search
           setup_api_stub
 
-          Sfdc::Api.setup(login_url, config)
+          @api.setup(config)
 
           hit_object = {"Name" => "object1"}
           objects = [hit_object, {"Name" => "object2"}]
@@ -159,7 +159,7 @@ module Embulk
         end
 
         def setup_api_stub
-          stub(Sfdc::Api).setup(login_url, config) do
+          stub(@api).setup(config) do
             @api.client.base_url = instance_url
             @api.instance_variable_set(:@version_path, version_path)
             @api.client.default_header = {Accept: 'application/json; charset=UTF-8', Authorization: "Bearer access_token"}

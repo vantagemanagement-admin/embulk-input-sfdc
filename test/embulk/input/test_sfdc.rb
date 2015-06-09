@@ -5,15 +5,16 @@ module Embulk
   module Input
     class SfdcInputPluginTest < Test::Unit::TestCase
       def test_run
-        @api = Sfdc::Api.new(login_url)
-        mock(Sfdc::Api).setup(login_url, config) do
-          @api.client.base_url = instance_url
-          @api.instance_variable_set(:@version_path, version_path)
-          @api.client.default_header = {Accept: 'application/json; charset=UTF-8', Authorization: "Bearer access_token"}
-          @api
+        any_instance_of(Sfdc::Api) do |klass|
+        mock(klass).setup(config) do
+          api = Sfdc::Api.new(login_url)
+          api.client.base_url = instance_url
+          api.instance_variable_set(:@version_path, version_path)
+          api.client.default_header = {Accept: 'application/json; charset=UTF-8', Authorization: "Bearer access_token"}
+          api
         end
 
-        mock(@api).search(soql) do
+        mock(klass).search(soql) do
           {
             "totalSize" => 5,
             "done" => false,
@@ -22,12 +23,13 @@ module Embulk
           }
         end
 
-        mock(@api).get(next_records_url) do
+        mock(klass).get(next_records_url) do
           {
             "totalSize" => 5,
             "done" => true,
             "records" => records_with_attributes[4..5],
           }
+        end
         end
 
         page_builder = Object.new # add mock later

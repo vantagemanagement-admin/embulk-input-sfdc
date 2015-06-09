@@ -9,12 +9,10 @@ module Embulk
 
         attr_reader :client
 
-        def self.setup(login_url, config)
-          api = new(login_url)
-
-          token = api.authentication(config)
-          api.set_latest_version(token)
-          api
+        def setup(config)
+          token = authentication(config)
+          set_latest_version(token)
+          self
         end
 
         def initialize(login_url)
