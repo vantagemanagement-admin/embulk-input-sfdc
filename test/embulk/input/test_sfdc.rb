@@ -131,9 +131,9 @@ module Embulk
 
       def test_searchable_target?
         assert_true Embulk::Input::SfdcInputPlugin.searchable_target?({"queryable" => true, "searchable" => true})
-        assert_false !!Embulk::Input::SfdcInputPlugin.searchable_target?({})
-        assert_false !!Embulk::Input::SfdcInputPlugin.searchable_target?({"searchable" => true})
-        assert_false !!Embulk::Input::SfdcInputPlugin.searchable_target?({"queryable" => true})
+        assert_false Embulk::Input::SfdcInputPlugin.searchable_target?({})
+        assert_false Embulk::Input::SfdcInputPlugin.searchable_target?({"searchable" => true})
+        assert_false Embulk::Input::SfdcInputPlugin.searchable_target?({"queryable" => true})
       end
 
       def test_embulk_config_to_hash

@@ -84,7 +84,7 @@ module Embulk
       end
 
       def self.searchable_target?(metadata)
-        metadata["queryable"] && metadata["searchable"]
+        !!(metadata["queryable"] && metadata["searchable"])
       end
 
       def add_next_records(response)
