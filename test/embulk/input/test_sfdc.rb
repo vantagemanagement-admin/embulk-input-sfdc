@@ -46,6 +46,15 @@ module Embulk
 
       def test_transaction
         control = proc {} # dummy
+        task = {
+          login_url: config["login_url"],
+          soql: config["soql"],
+          config: Embulk::Input::SfdcInputPlugin.embulk_config_to_hash(embulk_config),
+          schema: config["columns"],
+        }
+        columns = task[:schema].map do |col|
+          Embulk::Column.new(nil, col["name"], col["type"].to_sym, col["format"])
+        end
 
         mock(Embulk::Input::SfdcInputPlugin).resume(task, columns, 1, &control)
         Embulk::Input::SfdcInputPlugin.transaction(embulk_config, &control)
@@ -54,8 +63,8 @@ module Embulk
       def test_resume
         called = false
         control = proc { called = true}
-        # mock(control).call(task, columns, 1)
-        Embulk::Input::SfdcInputPlugin.resume(task, columns, 1, &control)
+
+        Embulk::Input::SfdcInputPlugin.resume({dummy: :task}, {dummy: :columns}, 1, &control)
         assert_true(called)
       end
 
@@ -183,21 +192,6 @@ module Embulk
 
       def embulk_config
         Embulk::DataSource[*config.to_a.flatten(1)]
-      end
-
-      def task
-        {
-          login_url: config["login_url"],
-          soql: config["soql"],
-          config: Embulk::Input::SfdcInputPlugin.embulk_config_to_hash(embulk_config),
-          schema: config["columns"],
-        }
-      end
-
-      def columns
-        task[:schema].map do |col|
-          Embulk::Column.new(nil, col["name"], col["type"].to_sym, col["format"])
-        end
       end
 
       def soql
