@@ -71,7 +71,7 @@ module Embulk
       class GuessTest < self
         def setup
           super
-          @api = api
+          @api = Sfdc::Api.new
           @config = embulk_config
           any_instance_of(Sfdc::Api) do |klass|
             stub(klass).setup(login_url, SfdcInputPlugin.embulk_config_to_hash(@config)) { @api }
@@ -97,10 +97,6 @@ module Embulk
         end
 
         private
-
-        def api
-          Sfdc::Api.new
-        end
 
         def metadata
           {
