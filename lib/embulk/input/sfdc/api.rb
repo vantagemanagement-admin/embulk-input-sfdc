@@ -54,7 +54,7 @@ module Embulk
             password: config[:password] + config[:security_token]
           }
 
-          oauth_response = @client.post(Pathname.new(login_url).join("services/oauth2/token").to_s, params)
+          oauth_response = @client.post(URI.join(login_url, "services/oauth2/token").to_s, params)
           oauth = JSON.parse(oauth_response.body)
 
           client.base_url = oauth["instance_url"]
