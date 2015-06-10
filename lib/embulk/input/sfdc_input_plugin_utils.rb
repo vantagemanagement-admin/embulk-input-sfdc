@@ -16,7 +16,7 @@ module Embulk
         end
       end
 
-      def self.build_soql(metadata, target)
+      def self.build_soql(target, metadata)
         target_columns = metadata["fields"].map {|fields| fields["name"] }
         "SELECT #{target_columns.join(',')} FROM #{target}"
       end

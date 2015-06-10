@@ -75,7 +75,7 @@ class EmbulkInputPluginUtilsTest < Test::Unit::TestCase
       ]
     }
     target = "Foo__c"
-    soql = Embulk::Input::SfdcInputPluginUtils.build_soql(metadata, target)
+    soql = Embulk::Input::SfdcInputPluginUtils.build_soql(target, metadata)
     assert_equal("SELECT foo,bar FROM #{target}", soql)
   end
 

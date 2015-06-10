@@ -44,7 +44,7 @@ module Embulk
         metadata = api.get_metadata(target)
         raise "Target #{target} can't be searched." unless searchable_target?(metadata)
 
-        soql = SfdcInputPluginUtils.build_soql(metadata, target)
+        soql = SfdcInputPluginUtils.build_soql(target, metadata)
         sobjects = api.search("#{soql} LIMIT 5")
 
         {
