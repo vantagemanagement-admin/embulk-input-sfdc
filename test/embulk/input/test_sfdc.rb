@@ -39,7 +39,7 @@ module Embulk
         end
         mock(page_builder).finish()
 
-        next_commit_diff = Embulk::Input::SfdcInputPlugin.new(task, nil, nil, page_builder).run
+        next_commit_diff = SfdcInputPlugin.new(task, nil, nil, page_builder).run
 
         assert_equal({}, next_commit_diff)
       end
@@ -53,18 +53,18 @@ module Embulk
           schema: config["columns"],
         }
         columns = task[:schema].map do |col|
-          Embulk::Column.new(nil, col["name"], col["type"].to_sym, col["format"])
+          Column.new(nil, col["name"], col["type"].to_sym, col["format"])
         end
 
-        mock(Embulk::Input::SfdcInputPlugin).resume(task, columns, 1, &control)
-        Embulk::Input::SfdcInputPlugin.transaction(embulk_config, &control)
+        mock(SfdcInputPlugin).resume(task, columns, 1, &control)
+        SfdcInputPlugin.transaction(embulk_config, &control)
       end
 
       def test_resume
         called = false
         control = proc { called = true }
 
-        Embulk::Input::SfdcInputPlugin.resume({dummy: :task}, {dummy: :columns}, 1, &control)
+        SfdcInputPlugin.resume({dummy: :task}, {dummy: :columns}, 1, &control)
         assert_true(called)
       end
 
@@ -83,7 +83,7 @@ module Embulk
           soql = SfdcInputPluginUtils.build_soql(config["target"], metadata)
           mock(@api).search("#{soql} LIMIT 5") { sobjects }
 
-          result = Embulk::Input::SfdcInputPlugin.guess(@config)
+          result = SfdcInputPlugin.guess(@config)
           assert_equal(soql, result["soql"])
           assert_equal(SfdcInputPluginUtils.guess_columns(sobjects), result["columns"])
         end
@@ -92,7 +92,7 @@ module Embulk
           mock(@api).get_metadata(@config.param("target", :string)) { metadata.reject{|k,v| k == "queryable"} }
 
           assert_raise do
-            Embulk::Input::SfdcInputPlugin.guess(@config)
+            SfdcInputPlugin.guess(@config)
           end
         end
 
@@ -130,10 +130,10 @@ module Embulk
       end
 
       def test_searchable_target?
-        assert_true Embulk::Input::SfdcInputPlugin.searchable_target?({"queryable" => true, "searchable" => true})
-        assert_false Embulk::Input::SfdcInputPlugin.searchable_target?({})
-        assert_false Embulk::Input::SfdcInputPlugin.searchable_target?({"searchable" => true})
-        assert_false Embulk::Input::SfdcInputPlugin.searchable_target?({"queryable" => true})
+        assert_true SfdcInputPlugin.searchable_target?({"queryable" => true, "searchable" => true})
+        assert_false SfdcInputPlugin.searchable_target?({})
+        assert_false SfdcInputPlugin.searchable_target?({"searchable" => true})
+        assert_false SfdcInputPlugin.searchable_target?({"queryable" => true})
       end
 
       def test_embulk_config_to_hash
@@ -144,7 +144,7 @@ module Embulk
           "password" => "passowrd",
           "security_token" => "security_token",
         }
-        embulk_config = Embulk::DataSource[*base_hash.to_a.flatten]
+        embulk_config = DataSource[*base_hash.to_a.flatten]
         actual = SfdcInputPlugin.embulk_config_to_hash(embulk_config)
         expect = base_hash.inject({}) do |result, (k,v)|
           result[k.to_sym] = v # key is Symbol, not String
@@ -191,7 +191,7 @@ module Embulk
       end
 
       def embulk_config
-        Embulk::DataSource[*config.to_a.flatten(1)]
+        DataSource[*config.to_a.flatten(1)]
       end
 
       def soql
