@@ -129,11 +129,18 @@ module Embulk
         end
       end
 
-      def test_searchable_target?
-        assert_true SfdcInputPlugin.searchable_target?({"queryable" => true, "searchable" => true})
-        assert_false SfdcInputPlugin.searchable_target?({})
-        assert_false SfdcInputPlugin.searchable_target?({"searchable" => true})
-        assert_false SfdcInputPlugin.searchable_target?({"queryable" => true})
+
+      data do
+        {
+          "queryable and searchable" => [true, {"queryable" => true, "searchable" => true}],
+          "queryable" => [false, {"queryable" => true}],
+          "searchable" => [false, {"searchable" => true}],
+          "none" => [false, {}],
+        }
+      end
+      def test_searchable_target?(data)
+        expected, actual = data
+        assert_equal(expected, SfdcInputPlugin.searchable_target?(actual))
       end
 
       def test_embulk_config_to_hash
