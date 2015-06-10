@@ -45,7 +45,19 @@ module Embulk
       end
 
       def test_transaction
-        # TODO
+        control = proc {} # dummy
+        task = {
+          login_url: config["login_url"],
+          soql: config["soql"],
+          config: Embulk::Input::SfdcInputPlugin.embulk_config_to_hash(embulk_config),
+          schema: config["columns"],
+        }
+        columns = task[:schema].map do |col|
+          Embulk::Column.new(nil, col["name"], col["type"].to_sym, col["format"])
+        end
+
+        mock(Embulk::Input::SfdcInputPlugin).resume(task, columns, 1, &control)
+        Embulk::Input::SfdcInputPlugin.transaction(embulk_config, &control)
       end
 
       def test_resume
@@ -81,10 +93,6 @@ module Embulk
         end
 
         private
-
-        def embulk_config
-          Embulk::DataSource[*config.to_a.flatten]
-        end
 
         def api
           Sfdc::Api.new
@@ -170,7 +178,16 @@ module Embulk
           "security_token" => "security_token",
           "login_url" => login_url,
           "target" => "dummy",
+          "soql" => "SELECT 1",
+          "columns" => [
+            {"name" => "foo", "type" => "string"},
+            {"name" => "bar", "type" => "integer"},
+          ]
         }
+      end
+
+      def embulk_config
+        Embulk::DataSource[*config.to_a.flatten(1)]
       end
 
       def soql

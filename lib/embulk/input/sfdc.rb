@@ -13,13 +13,7 @@ module Embulk
         task[:login_url] = config.param("login_url", :string, default: Sfdc::Api::DEFAULT_LOGIN_URL)
         task[:soql] = config.param("soql", :string)
 
-        task[:config] = {
-          client_id: config.param("client_id", :string),
-          client_secret: config.param("client_secret", :string),
-          username: config.param("username", :string),
-          password: config.param("password", :string),
-          security_token: config.param("security_token", :string),
-        }
+        task[:config] = embulk_config_to_hash(config)
 
         task[:schema] = config.param("columns", :array)
         columns = []
