@@ -53,7 +53,7 @@ module Embulk
           security_token: config.param("security_token", :string),
         }
 
-        client = Sfdc::Api.setup(login_url, config)
+        client = Sfdc::Api.new.setup(login_url, config)
 
         metadata = client.get_metadata(target)
 
@@ -73,7 +73,7 @@ module Embulk
       end
 
       def init
-        @api = Sfdc::Api.setup(task["login_url"], task["config"])
+        @api = Sfdc::Api.new.setup(task["login_url"], task["config"])
         @schema = task["schema"]
         @soql = task["soql"]
       end
