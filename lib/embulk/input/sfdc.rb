@@ -45,30 +45,17 @@ module Embulk
         login_url = config.param("login_url", :string, default: Sfdc::Api::DEFAULT_LOGIN_URL)
         target = config.param("target", :string)
 
-        config = {
-          client_id: config.param("client_id", :string),
-          client_secret: config.param("client_secret", :string),
-          username: config.param("username", :string),
-          password: config.param("password", :string),
-          security_token: config.param("security_token", :string),
-        }
+        api = Sfdc::Api.new.setup(login_url, embulk_config_to_hash(config))
 
-        client = Sfdc::Api.new.setup(login_url, config)
+        metadata = api.get_metadata(target)
+        raise "Target #{target} can't be searched." unless searchable_target?(metadata)
 
-        metadata = client.get_metadata(target)
-
-        raise "Target #{target} can't be searched." if !metadata["queryable"] || !metadata["searchable"]
-
-        # get objects for guess
-        target_columns = metadata["fields"].map {|fields| fields["name"] }
-        soql = "SELECT #{target_columns.join(',')} FROM #{target}"
-
-        sobjects = client.search("#{soql} limit 5")
-        sample_records = SfdcInputPluginUtils.extract_records(sobjects["records"])
+        soql = SfdcInputPluginUtils.build_soql(metadata, target)
+        sobjects = api.search("#{soql} LIMIT 5")
 
         {
           "soql" => soql,
-          "columns" => SfdcInputPluginUtils.guess_columns(sample_records)
+          "columns" => SfdcInputPluginUtils.guess_columns(sobjects)
         }
       end
 
@@ -91,6 +78,20 @@ module Embulk
       end
 
       private
+
+      def self.embulk_config_to_hash(config)
+        {
+          client_id: config.param("client_id", :string),
+          client_secret: config.param("client_secret", :string),
+          username: config.param("username", :string),
+          password: config.param("password", :string),
+          security_token: config.param("security_token", :string),
+        }
+      end
+
+      def self.searchable_target?(metadata)
+        metadata["queryable"] && metadata["searchable"]
+      end
 
       def add_next_records(response)
         return if response["done"]

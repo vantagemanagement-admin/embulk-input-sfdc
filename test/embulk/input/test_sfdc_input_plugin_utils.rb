@@ -12,6 +12,10 @@ class EmbulkInputPluginUtilsTest < Test::Unit::TestCase
       }
     ]
 
+    sobjects = {
+      "records" => records
+    }
+
     expected = [
       {name: "key", type: :string},
       {name: "count", type: :long},
@@ -19,7 +23,7 @@ class EmbulkInputPluginUtilsTest < Test::Unit::TestCase
       {name: "created", type: :timestamp, format: "%Y-%m-%dT%H:%M:%S"}
     ]
 
-    actual = Embulk::Input::SfdcInputPluginUtils.guess_columns(records)
+    actual = Embulk::Input::SfdcInputPluginUtils.guess_columns(sobjects)
     assert_equal(expected, actual)
   end
 

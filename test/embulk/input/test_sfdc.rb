@@ -1,5 +1,6 @@
 require "prepare_embulk"
 require "embulk/input/sfdc"
+require "embulk/data_source"
 
 module Embulk
   module Input
@@ -43,6 +44,103 @@ module Embulk
         assert_equal({}, next_commit_diff)
       end
 
+      def test_transaction
+        # TODO
+      end
+
+      def test_resume
+        # TODO
+      end
+
+      class GuessTest < self
+        def setup
+          super
+          @api = api
+          @config = embulk_config
+          any_instance_of(Sfdc::Api) do |klass|
+            stub(klass).setup(login_url, Embulk::Input::SfdcInputPlugin.embulk_config_to_hash(@config)) { @api }
+          end
+        end
+
+        def test_guess
+          mock(@api).get_metadata(@config.param("target", :string)) { metadata }
+          soql = SfdcInputPluginUtils.build_soql(metadata, config["target"])
+          mock(@api).search("#{soql} LIMIT 5") { sobjects }
+
+          result = Embulk::Input::SfdcInputPlugin.guess(@config)
+          assert_equal(soql, result["soql"])
+          assert_equal(SfdcInputPluginUtils.guess_columns(sobjects), result["columns"])
+        end
+
+        def test_guess_unsearchable_target
+          mock(@api).get_metadata(@config.param("target", :string)) { metadata.reject{|k,v| k == "queryable"} }
+
+          assert_raise do
+            Embulk::Input::SfdcInputPlugin.guess(@config)
+          end
+        end
+
+        private
+
+        def embulk_config
+          Embulk::DataSource[*config.to_a.flatten]
+        end
+
+        def api
+          Sfdc::Api.new
+        end
+
+        def metadata
+          {
+            "fields" => [
+              {"name" => "foo"},
+              {"name" => "bar"},
+            ],
+            "queryable" => "1",
+            "searchable" => "1",
+          }
+        end
+
+        def sobjects
+          {
+            "records" => [
+              {
+                "title" => "foobar",
+                "id" => "id1",
+              },
+              {
+                "title" => "hoge",
+                "id" => "id2",
+              }
+            ]
+          }
+        end
+      end
+
+      def test_searchable_target?
+        assert_true Embulk::Input::SfdcInputPlugin.searchable_target?({"queryable" => true, "searchable" => true})
+        assert_false !!Embulk::Input::SfdcInputPlugin.searchable_target?({})
+        assert_false !!Embulk::Input::SfdcInputPlugin.searchable_target?({"searchable" => true})
+        assert_false !!Embulk::Input::SfdcInputPlugin.searchable_target?({"queryable" => true})
+      end
+
+      def test_embulk_config_to_hash
+        base_hash = {
+          "client_id" => "client_id",
+          "client_secret" => "client_secret",
+          "username" => "username",
+          "password" => "passowrd",
+          "security_token" => "security_token",
+        }
+        embulk_config = Embulk::DataSource[*base_hash.to_a.flatten]
+        actual = Embulk::Input::SfdcInputPlugin.embulk_config_to_hash(embulk_config)
+        expect = base_hash.inject({}) do |result, (k,v)|
+          result[k.to_sym] = v # key is Symbol, not String
+          result
+        end
+        assert_equal(expect, actual)
+      end
+
       private
 
       def task
@@ -70,6 +168,8 @@ module Embulk
           "username" => "username",
           "password" => "passowrd",
           "security_token" => "security_token",
+          "login_url" => login_url,
+          "target" => "dummy",
         }
       end
 
