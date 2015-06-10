@@ -1,5 +1,6 @@
 require "prepare_embulk"
 require "embulk/input/sfdc"
+require "embulk/data_source"
 
 module Embulk
   module Input
@@ -38,9 +39,121 @@ module Embulk
         end
         mock(page_builder).finish()
 
-        next_commit_diff = Embulk::Input::SfdcInputPlugin.new(task, nil, nil, page_builder).run
+        next_commit_diff = SfdcInputPlugin.new(task, nil, nil, page_builder).run
 
         assert_equal({}, next_commit_diff)
+      end
+
+      def test_transaction
+        control = proc {} # dummy
+        task = {
+          login_url: config["login_url"],
+          soql: config["soql"],
+          config: SfdcInputPlugin.embulk_config_to_hash(embulk_config),
+          schema: config["columns"],
+        }
+        columns = task[:schema].map do |col|
+          Column.new(nil, col["name"], col["type"].to_sym, col["format"])
+        end
+
+        mock(SfdcInputPlugin).resume(task, columns, 1, &control)
+        SfdcInputPlugin.transaction(embulk_config, &control)
+      end
+
+      def test_resume
+        called = false
+        control = proc { called = true }
+
+        SfdcInputPlugin.resume({dummy: :task}, {dummy: :columns}, 1, &control)
+        assert_true(called)
+      end
+
+      class GuessTest < self
+        def setup
+          super
+          @api = Sfdc::Api.new
+          @config = embulk_config
+          any_instance_of(Sfdc::Api) do |klass|
+            stub(klass).setup(login_url, SfdcInputPlugin.embulk_config_to_hash(@config)) { @api }
+          end
+        end
+
+        def test_guess
+          mock(@api).get_metadata(@config.param("target", :string)) { metadata }
+          soql = SfdcInputPluginUtils.build_soql(config["target"], metadata)
+          mock(@api).search("#{soql} LIMIT 5") { sobjects }
+
+          result = SfdcInputPlugin.guess(@config)
+          assert_equal(soql, result["soql"])
+          assert_equal(SfdcInputPluginUtils.guess_columns(sobjects), result["columns"])
+        end
+
+        def test_guess_unsearchable_target
+          mock(@api).get_metadata(@config.param("target", :string)) { metadata.reject{|k,v| k == "queryable"} }
+
+          assert_raise do
+            SfdcInputPlugin.guess(@config)
+          end
+        end
+
+        private
+
+        def metadata
+          {
+            "fields" => [
+              {"name" => "foo"},
+              {"name" => "bar"},
+            ],
+            "queryable" => "1",
+            "searchable" => "1",
+          }
+        end
+
+        def sobjects
+          {
+            "records" => [
+              {
+                "title" => "foobar",
+                "id" => "id1",
+              },
+              {
+                "title" => "hoge",
+                "id" => "id2",
+              }
+            ]
+          }
+        end
+      end
+
+
+      data do
+        {
+          "queryable and searchable" => [true, {"queryable" => true, "searchable" => true}],
+          "queryable" => [false, {"queryable" => true}],
+          "searchable" => [false, {"searchable" => true}],
+          "none" => [false, {}],
+        }
+      end
+      def test_searchable_target?(data)
+        expected, actual = data
+        assert_equal(expected, SfdcInputPlugin.searchable_target?(actual))
+      end
+
+      def test_embulk_config_to_hash
+        base_hash = {
+          "client_id" => "client_id",
+          "client_secret" => "client_secret",
+          "username" => "username",
+          "password" => "passowrd",
+          "security_token" => "security_token",
+        }
+        embulk_config = DataSource[*base_hash.to_a.flatten]
+        actual = SfdcInputPlugin.embulk_config_to_hash(embulk_config)
+        expect = base_hash.inject({}) do |result, (k,v)|
+          result[k.to_sym] = v # key is Symbol, not String
+          result
+        end
+        assert_equal(expect, actual)
       end
 
       private
@@ -70,7 +183,18 @@ module Embulk
           "username" => "username",
           "password" => "passowrd",
           "security_token" => "security_token",
+          "login_url" => login_url,
+          "target" => "dummy",
+          "soql" => "SELECT 1",
+          "columns" => [
+            {"name" => "foo", "type" => "string"},
+            {"name" => "bar", "type" => "integer"},
+          ]
         }
+      end
+
+      def embulk_config
+        DataSource[*config.to_a.flatten(1)]
       end
 
       def soql

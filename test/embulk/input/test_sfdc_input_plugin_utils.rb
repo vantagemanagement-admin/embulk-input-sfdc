@@ -12,6 +12,10 @@ class EmbulkInputPluginUtilsTest < Test::Unit::TestCase
       }
     ]
 
+    sobjects = {
+      "records" => records
+    }
+
     expected = [
       {name: "key", type: :string},
       {name: "count", type: :long},
@@ -19,7 +23,7 @@ class EmbulkInputPluginUtilsTest < Test::Unit::TestCase
       {name: "created", type: :timestamp, format: "%Y-%m-%dT%H:%M:%S"}
     ]
 
-    actual = Embulk::Input::SfdcInputPluginUtils.guess_columns(records)
+    actual = Embulk::Input::SfdcInputPluginUtils.guess_columns(sobjects)
     assert_equal(expected, actual)
   end
 
@@ -61,6 +65,18 @@ class EmbulkInputPluginUtilsTest < Test::Unit::TestCase
     actual = Embulk::Input::SfdcInputPluginUtils.extract_records(json)
 
     assert_equal(expected, actual)
+  end
+
+  def test_build_soql
+    metadata = {
+      "fields" => [
+        {"name" => "foo"},
+        {"name" => "bar"}
+      ]
+    }
+    target = "Foo__c"
+    soql = Embulk::Input::SfdcInputPluginUtils.build_soql(target, metadata)
+    assert_equal("SELECT foo,bar FROM #{target}", soql)
   end
 
   data do
