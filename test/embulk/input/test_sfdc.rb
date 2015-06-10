@@ -62,7 +62,7 @@ module Embulk
 
       def test_resume
         called = false
-        control = proc { called = true}
+        control = proc { called = true }
 
         Embulk::Input::SfdcInputPlugin.resume({dummy: :task}, {dummy: :columns}, 1, &control)
         assert_true(called)
