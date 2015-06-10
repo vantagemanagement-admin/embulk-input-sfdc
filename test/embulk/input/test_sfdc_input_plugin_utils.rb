@@ -67,6 +67,18 @@ class EmbulkInputPluginUtilsTest < Test::Unit::TestCase
     assert_equal(expected, actual)
   end
 
+  def test_build_soql
+    metadata = {
+      "fields" => [
+        {"name" => "foo"},
+        {"name" => "bar"}
+      ]
+    }
+    target = "Foo__c"
+    soql = Embulk::Input::SfdcInputPluginUtils.build_soql(metadata, target)
+    assert_equal("SELECT foo,bar FROM #{target}", soql)
+  end
+
   data do
     {
       "nil" => [nil, [nil, :string]],
