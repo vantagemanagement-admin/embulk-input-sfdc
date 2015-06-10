@@ -49,7 +49,7 @@ module Embulk
         task = {
           login_url: config["login_url"],
           soql: config["soql"],
-          config: Embulk::Input::SfdcInputPlugin.embulk_config_to_hash(embulk_config),
+          config: SfdcInputPlugin.embulk_config_to_hash(embulk_config),
           schema: config["columns"],
         }
         columns = task[:schema].map do |col|
@@ -74,7 +74,7 @@ module Embulk
           @api = api
           @config = embulk_config
           any_instance_of(Sfdc::Api) do |klass|
-            stub(klass).setup(login_url, Embulk::Input::SfdcInputPlugin.embulk_config_to_hash(@config)) { @api }
+            stub(klass).setup(login_url, SfdcInputPlugin.embulk_config_to_hash(@config)) { @api }
           end
         end
 
@@ -145,7 +145,7 @@ module Embulk
           "security_token" => "security_token",
         }
         embulk_config = Embulk::DataSource[*base_hash.to_a.flatten]
-        actual = Embulk::Input::SfdcInputPlugin.embulk_config_to_hash(embulk_config)
+        actual = SfdcInputPlugin.embulk_config_to_hash(embulk_config)
         expect = base_hash.inject({}) do |result, (k,v)|
           result[k.to_sym] = v # key is Symbol, not String
           result
