@@ -80,7 +80,7 @@ module Embulk
 
         def test_guess
           mock(@api).get_metadata(@config.param("target", :string)) { metadata }
-          soql = SfdcInputPluginUtils.build_soql(metadata, config["target"])
+          soql = SfdcInputPluginUtils.build_soql(config["target"], metadata)
           mock(@api).search("#{soql} LIMIT 5") { sobjects }
 
           result = Embulk::Input::SfdcInputPlugin.guess(@config)
