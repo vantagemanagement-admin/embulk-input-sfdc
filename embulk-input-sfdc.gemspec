@@ -1,4 +1,4 @@
-require "embulk/input/sfdc/version"
+require File.expand_path("../lib/embulk/input/sfdc/version.rb", __FILE__)
 
 Gem::Specification.new do |spec|
   spec.name          = "embulk-input-sfdc"
