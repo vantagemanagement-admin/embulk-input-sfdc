@@ -81,14 +81,14 @@ module Embulk
           # NOTE: Sometimes (on error) body is Array
           body = body.first if body.is_a? Array
 
-          case status_code.to_s[0]
-          when "4"
+          case status_code
+          when 400..499
             message = "StatusCode: #{status_code}"
 
             message << ": #{body['errorCode']}" if body["errorCode"]
             message << ": #{body['message']}" if body["message"]
             raise Sfdc::ApiError, message
-          when "5" # 500
+          when 500..599
             raise Sfdc::InternalServerError, "Force.com REST API returns 500 (Inernal Server Error). Please contact customer support of Force.com."
           end
         end
