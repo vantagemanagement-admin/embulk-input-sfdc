@@ -90,6 +90,7 @@ module Embulk
             result = {"statusCode" => "OK"}
             path = "success"
             mock(@api.client).get(path, {}) do |res|
+              mock(res).status_code { 200 }
               mock(res).body { result.to_json }
             end
 
@@ -102,13 +103,50 @@ module Embulk
             parameters = {"parameter" => "is OK"}
 
             mock(@api.client).get(path, parameters) do |res|
+              mock(res).status_code { 200 }
               mock(res).body { result.to_json }
             end
 
             assert_equal(result, @api.get(path, parameters))
           end
 
-          # TODO: add the test by error after implemented error-handling
+          def test_failure_with_404
+            result = {
+              "errorCode" => "NotFound",
+              "message" => "This is not found message."
+            }
+
+            path = "failure"
+            parameters = {"parameter" => "is not OK"}
+
+            mock(@api.client).get(path, parameters) do |res|
+              mock(res).status_code { 404 }
+              mock(res).body { result.to_json }
+            end
+
+            assert_raise(Sfdc::ApiError) do
+              @api.get(path, parameters)
+            end
+          end
+
+          def test_failure_with_500
+            result = {
+              "errorCode" => "InternalServerError",
+              "message" => "This is Internal Server Error message."
+            }
+
+            path = "failure"
+            parameters = {"parameter" => "is not OK"}
+
+            mock(@api.client).get(path, parameters) do |res|
+              mock(res).status_code { 500 }
+              mock(res).body { result.to_json }
+            end
+
+            assert_raise(Sfdc::InternalServerError) do
+              @api.get(path, parameters)
+            end
+          end
         end
 
         private

@@ -4,6 +4,9 @@ require "pathname"
 module Embulk
   module Input
     module Sfdc
+      class ApiError < StandardError; end
+      class InternalServerError < StandardError; end
+
       class Api
         DEFAULT_LOGIN_URL = "https://login.salesforce.com".freeze
 
@@ -22,9 +25,22 @@ module Embulk
         end
 
         def get(path, parameters={})
-          # TODO: error handling
           response = client.get(path, parameters)
-          JSON.parse(response.body)
+          body = JSON.parse(response.body)
+
+          # NOTE: Sometimes (on error) body is Array
+          body = body.first if body.is_a? Array
+
+          case response.status_code.to_s[0]
+          when "4"
+            error_code = body["errorCode"]
+            message = body["message"]
+            raise Sfdc::ApiError, "#{error_code}: #{message}"
+          when "5" # 500
+            raise Sfdc::InternalServerError, "Error causes in Force.com. Please contact customer support of Force.com."
+          end
+
+          body
         end
 
         def get_metadata(sobject_name)

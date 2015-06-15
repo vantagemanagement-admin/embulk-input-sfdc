@@ -87,6 +87,9 @@ module Embulk
         !!(metadata["queryable"] && metadata["searchable"])
       end
 
+      def self.handle_error(response_body)
+      end
+
       def add_next_records(response)
         return if response["done"]
         next_url = response["nextRecordsUrl"]
