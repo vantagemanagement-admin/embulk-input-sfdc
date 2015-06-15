@@ -24,6 +24,7 @@ module Embulk
         def get(path, parameters={})
           # TODO: error handling
           response = client.get(path, parameters)
+          p response
           JSON.parse(response.body)
         end
 

@@ -42,6 +42,7 @@ module Embulk
         api = Sfdc::Api.new.setup(login_url, embulk_config_to_hash(config))
 
         metadata = api.get_metadata(target)
+        p metadata
         raise "Target #{target} can't be searched." unless searchable_target?(metadata)
 
         soql = SfdcInputPluginUtils.build_soql(target, metadata)
