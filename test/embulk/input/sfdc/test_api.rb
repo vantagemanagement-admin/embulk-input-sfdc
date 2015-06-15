@@ -58,10 +58,8 @@ module Embulk
           @api.setup(login_url, config)
 
           metadata = {"metadata" => "is here"}
-          mock(@api.client).get(version_path.join("sobjects/custom__c/describe").to_s) do |res|
-            mock(res).body do
-              metadata.to_json
-            end
+          mock(@api).get(version_path.join("sobjects/custom__c/describe").to_s) do
+            metadata
           end
 
           assert_equal(metadata, @api.get_metadata("custom__c"))

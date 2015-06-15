@@ -22,14 +22,14 @@ module Embulk
         end
 
         def get(path, parameters={})
-          # TODO: Use this method by #get_metadata and #search
+          # TODO: Use this method by #search
           # TODO: error handling
-          JSON.parse(client.get(path, parameters).body)
+          response = client.get(path, parameters)
+          JSON.parse(response.body)
         end
 
         def get_metadata(sobject_name)
-          sobject_metadata = client.get(@version_path.join("sobjects/#{sobject_name}/describe").to_s)
-          JSON.parse(sobject_metadata.body)
+          get(@version_path.join("sobjects/#{sobject_name}/describe").to_s)
         end
 
         def search(soql)
