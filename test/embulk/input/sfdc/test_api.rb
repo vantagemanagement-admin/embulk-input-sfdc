@@ -23,6 +23,7 @@ module Embulk
 
           def test_instance_url
             mock(@api.client).post("#{login_url}/services/oauth2/token", params) do |res|
+              mock(res).status_code { 200 }
               mock(res).body { authentication_response }
             end
             mock(@api).set_latest_version("access_token") { @api }

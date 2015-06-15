@@ -28,18 +28,7 @@ module Embulk
           response = client.get(path, parameters)
           body = JSON.parse(response.body)
 
-          # NOTE: Sometimes (on error) body is Array
-          body = body.first if body.is_a? Array
-
-          case response.status_code.to_s[0]
-          when "4"
-            error_code = body["errorCode"]
-            message = body["message"]
-            raise Sfdc::ApiError, "#{error_code}: #{message}"
-          when "5" # 500
-            raise Sfdc::InternalServerError, "Error causes in Force.com. Please contact customer support of Force.com."
-          end
-
+          handle_error(body, response.status_code)
           body
         end
 
@@ -71,6 +60,7 @@ module Embulk
 
           oauth_response = @client.post(URI.join(login_url, "services/oauth2/token").to_s, params)
           oauth = JSON.parse(oauth_response.body)
+          handle_error(oauth, oauth_response.status_code)
 
           client.base_url = oauth["instance_url"]
 
@@ -85,6 +75,22 @@ module Embulk
           client.default_header = client.default_header.merge(Authorization: "Bearer #{access_token}")
 
           self
+        end
+
+        def handle_error(body, status_code)
+          # NOTE: Sometimes (on error) body is Array
+          body = body.first if body.is_a? Array
+
+          case status_code.to_s[0]
+          when "4"
+            message = "StatusCode: #{status_code}"
+
+            message << ": #{body['errorCode']}" if body["errorCode"]
+            message << ": #{body['message']}" if body["message"]
+            raise Sfdc::ApiError, message
+          when "5" # 500
+            raise Sfdc::InternalServerError, "Error causes in Force.com. Please contact customer support of Force.com."
+          end
         end
       end
     end
