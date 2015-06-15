@@ -4,6 +4,9 @@ require "pathname"
 module Embulk
   module Input
     module Sfdc
+      class ApiError < StandardError; end
+      class InternalServerError < StandardError; end
+
       class Api
         DEFAULT_LOGIN_URL = "https://login.salesforce.com".freeze
 
@@ -22,18 +25,19 @@ module Embulk
         end
 
         def get(path, parameters={})
-          # TODO: Use this method by #get_metadata and #search
-          # TODO: error handling
-          JSON.parse(client.get(path, parameters).body)
+          response = client.get(path, parameters)
+          body = JSON.parse(response.body)
+
+          handle_error(body, response.status_code)
+          body
         end
 
         def get_metadata(sobject_name)
-          sobject_metadata = client.get(@version_path.join("sobjects/#{sobject_name}/describe").to_s)
-          JSON.parse(sobject_metadata.body)
+          get(@version_path.join("sobjects/#{sobject_name}/describe").to_s)
         end
 
         def search(soql)
-          JSON.parse(client.get(@version_path.join("query").to_s, {q: soql}).body)
+          get(@version_path.join("query").to_s, {q: soql})
         end
 
         private
@@ -56,6 +60,7 @@ module Embulk
 
           oauth_response = @client.post(URI.join(login_url, "services/oauth2/token").to_s, params)
           oauth = JSON.parse(oauth_response.body)
+          handle_error(oauth, oauth_response.status_code)
 
           client.base_url = oauth["instance_url"]
 
@@ -70,6 +75,22 @@ module Embulk
           client.default_header = client.default_header.merge(Authorization: "Bearer #{access_token}")
 
           self
+        end
+
+        def handle_error(body, status_code)
+          # NOTE: Sometimes (on error) body is Array
+          body = body.first if body.is_a? Array
+
+          case status_code
+          when 400..499
+            message = "StatusCode: #{status_code}"
+
+            message << ": #{body['errorCode']}" if body["errorCode"]
+            message << ": #{body['message']}" if body["message"]
+            raise Sfdc::ApiError, message
+          when 500..599
+            raise Sfdc::InternalServerError, "Force.com REST API returns 500 (Internal Server Error). Please contact customer support of Force.com."
+          end
         end
       end
     end

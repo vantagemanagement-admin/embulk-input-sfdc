@@ -23,6 +23,7 @@ module Embulk
 
           def test_instance_url
             mock(@api.client).post("#{login_url}/services/oauth2/token", params) do |res|
+              mock(res).status_code { 200 }
               mock(res).body { authentication_response }
             end
             mock(@api).set_latest_version("access_token") { @api }
@@ -58,10 +59,8 @@ module Embulk
           @api.setup(login_url, config)
 
           metadata = {"metadata" => "is here"}
-          mock(@api.client).get(version_path.join("sobjects/custom__c/describe").to_s) do |res|
-            mock(res).body do
-              metadata.to_json
-            end
+          mock(@api).get(version_path.join("sobjects/custom__c/describe").to_s) do
+            metadata
           end
 
           assert_equal(metadata, @api.get_metadata("custom__c"))
@@ -76,8 +75,8 @@ module Embulk
           objects = [hit_object, {"Name" => "object2"}]
           soql = "SELECT name FROM custom__c WHERE Name='object1'"
 
-          mock(@api.client).get(version_path.join("query").to_s, {q: soql}) do |res|
-            mock(res).body { hit_object.to_json }
+          mock(@api).get(version_path.join("query").to_s, {q: soql}) do
+            hit_object
           end
 
           assert_equal(hit_object, @api.search(soql))
@@ -92,6 +91,7 @@ module Embulk
             result = {"statusCode" => "OK"}
             path = "success"
             mock(@api.client).get(path, {}) do |res|
+              mock(res).status_code { 200 }
               mock(res).body { result.to_json }
             end
 
@@ -104,13 +104,50 @@ module Embulk
             parameters = {"parameter" => "is OK"}
 
             mock(@api.client).get(path, parameters) do |res|
+              mock(res).status_code { 200 }
               mock(res).body { result.to_json }
             end
 
             assert_equal(result, @api.get(path, parameters))
           end
 
-          # TODO: add the test by error after implemented error-handling
+          def test_failure_with_404
+            result = {
+              "errorCode" => "NotFound",
+              "message" => "This is not found message."
+            }
+
+            path = "failure"
+            parameters = {"parameter" => "is not OK"}
+
+            mock(@api.client).get(path, parameters) do |res|
+              mock(res).status_code { 404 }
+              mock(res).body { result.to_json }
+            end
+
+            assert_raise(Sfdc::ApiError) do
+              @api.get(path, parameters)
+            end
+          end
+
+          def test_failure_with_500
+            result = {
+              "errorCode" => "InternalServerError",
+              "message" => "This is Internal Server Error message."
+            }
+
+            path = "failure"
+            parameters = {"parameter" => "is not OK"}
+
+            mock(@api.client).get(path, parameters) do |res|
+              mock(res).status_code { 500 }
+              mock(res).body { result.to_json }
+            end
+
+            assert_raise(Sfdc::InternalServerError) do
+              @api.get(path, parameters)
+            end
+          end
         end
 
         private
