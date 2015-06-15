@@ -89,7 +89,7 @@ module Embulk
             message << ": #{body['message']}" if body["message"]
             raise Sfdc::ApiError, message
           when "5" # 500
-            raise Sfdc::InternalServerError, "Error causes in Force.com. Please contact customer support of Force.com."
+            raise Sfdc::InternalServerError, "Force.com REST API returns 500 (Inernal Server Error). Please contact customer support of Force.com."
           end
         end
       end
