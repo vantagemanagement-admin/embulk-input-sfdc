@@ -22,7 +22,6 @@ module Embulk
         end
 
         def get(path, parameters={})
-          # TODO: Use this method by #search
           # TODO: error handling
           response = client.get(path, parameters)
           JSON.parse(response.body)
@@ -33,7 +32,7 @@ module Embulk
         end
 
         def search(soql)
-          JSON.parse(client.get(@version_path.join("query").to_s, {q: soql}).body)
+          get(@version_path.join("query").to_s, {q: soql})
         end
 
         private

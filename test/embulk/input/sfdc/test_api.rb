@@ -74,8 +74,8 @@ module Embulk
           objects = [hit_object, {"Name" => "object2"}]
           soql = "SELECT name FROM custom__c WHERE Name='object1'"
 
-          mock(@api.client).get(version_path.join("query").to_s, {q: soql}) do |res|
-            mock(res).body { hit_object.to_json }
+          mock(@api).get(version_path.join("query").to_s, {q: soql}) do
+            hit_object
           end
 
           assert_equal(hit_object, @api.search(soql))
