@@ -1,10 +1,13 @@
 require "prepare_embulk"
+require "output_capture"
 require "embulk/input/sfdc"
 require "embulk/data_source"
 
 module Embulk
   module Input
     class SfdcInputPluginTest < Test::Unit::TestCase
+      include OutputCapture
+
       def test_run
         any_instance_of(Sfdc::Api) do |klass|
           mock(klass).setup(login_url, config) do
@@ -39,7 +42,10 @@ module Embulk
         end
         mock(page_builder).finish()
 
-        next_commit_diff = SfdcInputPlugin.new(task, nil, nil, page_builder).run
+        next_commit_diff = nil
+        capture do
+          next_commit_diff = SfdcInputPlugin.new(task, nil, nil, page_builder).run
+        end
 
         assert_equal({}, next_commit_diff)
       end

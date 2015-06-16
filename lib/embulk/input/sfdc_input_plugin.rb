@@ -1,5 +1,6 @@
 require "embulk/input/sfdc/api"
 require "embulk/input/sfdc_input_plugin_utils"
+require "logger"
 
 module Embulk
   module Input
@@ -61,6 +62,7 @@ module Embulk
 
       def run
         response = @api.search(@soql)
+        logger.debug "Start to add records..."
         add_records(response["records"])
 
         add_next_records(response)
@@ -89,6 +91,7 @@ module Embulk
 
       def add_next_records(response)
         return if response["done"]
+        logger.debug "2000 records are added, but other records remains. Next 2000 records are adding now."
         next_url = response["nextRecordsUrl"]
         response = @api.get(next_url)
 
@@ -107,6 +110,23 @@ module Embulk
 
           page_builder.add(values)
         end
+      end
+
+      # TODO: Replace Embulk::Logger after merging
+      # https://github.com/embulk/embulk/pull/200
+      def self.logger
+        @logger ||=
+          begin
+            logger = Logger.new($stdout)
+            logger.formatter = proc do |severity, datetime, progname, msg|
+              "#{datetime.strftime("%Y-%m-%d %H:%M:%S.%L %z")} [#{severity}] #{msg}\n"
+            end
+            logger
+          end
+      end
+
+      def logger
+        self.class.logger
       end
     end
   end
