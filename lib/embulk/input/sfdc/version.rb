@@ -1,8 +1,7 @@
-require "embulk/input/sfdc_input_plugin"
-
 module Embulk
   module Input
     module Sfdc
+      VERSION = "0.0.1".freeze
     end
   end
 end
