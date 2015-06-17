@@ -1,11 +1,14 @@
 require "embulk/input/sfdc/api"
 require "embulk/input/sfdc_input_plugin_utils"
+require "logger"
 
 module Embulk
   module Input
 
     class SfdcInputPlugin < InputPlugin
       Plugin.register_input("sfdc", self)
+
+      MAX_FETCHABLE_COUNT = 2000
 
       def self.transaction(config, &control)
         task = {}
@@ -61,11 +64,14 @@ module Embulk
 
       def run
         response = @api.search(@soql)
+        logger.debug "Start to add records...(total #{response["totalSize"]} records)"
         add_records(response["records"])
 
-        add_next_records(response)
+        add_next_records(response, 1)
 
         page_builder.finish
+
+        logger.debug "Added all records."
 
         commit_report = {}
         return commit_report
@@ -87,14 +93,15 @@ module Embulk
         !!(metadata["queryable"] && metadata["searchable"])
       end
 
-      def add_next_records(response)
+      def add_next_records(response, fetch_count)
         return if response["done"]
+        logger.debug "Added #{MAX_FETCHABLE_COUNT * fetch_count}/#{response["totalSize"]} records."
         next_url = response["nextRecordsUrl"]
         response = @api.get(next_url)
 
         add_records(response["records"])
 
-        add_next_records(response)
+        add_next_records(response, fetch_count + 1)
       end
 
       def add_records(records)
@@ -107,6 +114,23 @@ module Embulk
 
           page_builder.add(values)
         end
+      end
+
+      # TODO: Replace Embulk::Logger after merging
+      # https://github.com/embulk/embulk/pull/200
+      def self.logger
+        @logger ||=
+          begin
+            logger = Logger.new($stdout)
+            logger.formatter = proc do |severity, datetime, progname, msg|
+              "#{datetime.strftime("%Y-%m-%d %H:%M:%S.%L %z")} [#{severity}] #{msg}\n"
+            end
+            logger
+          end
+      end
+
+      def logger
+        self.class.logger
       end
     end
   end
