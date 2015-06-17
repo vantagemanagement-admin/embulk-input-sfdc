@@ -8,8 +8,11 @@ module Embulk
           @api = Sfdc::Api.new
         end
 
-        def test_initialize
+        def test_initialize_client
           assert_true(@api.client.is_a?(HTTPClient))
+        end
+
+        def test_initialize_default_header
           assert_equal({Accept: 'application/json; charset=UTF-8'}, @api.client.default_header)
         end
 
