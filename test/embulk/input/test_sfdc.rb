@@ -8,46 +8,79 @@ module Embulk
     class SfdcInputPluginTest < Test::Unit::TestCase
       include OutputCapture
 
-      def test_run
-        any_instance_of(Sfdc::Api) do |klass|
-          mock(klass).setup(login_url, config) do
-            api = Sfdc::Api.new
-            api.client.base_url = instance_url
-            api.instance_variable_set(:@version_path, version_path)
-            api.client.default_header = {Accept: 'application/json; charset=UTF-8', Authorization: "Bearer access_token"}
-            api
+      class RunTest < self
+        setup :setup_plugin
+
+        def test_run
+          mock(@api).search(task["soql"]) { sfdc_response }
+          mock(@plugin).add_records(sfdc_response["records"])
+          mock(@plugin).add_next_records(sfdc_response, 1)
+          mock(@page_builder).finish
+          capture { @plugin.run }
+        end
+
+        def test_page_builder_add_with_formatted_record
+          SfdcInputPluginUtils.extract_records(records_with_attributes).each do |record|
+            values = task["schema"].collect do |column|
+              SfdcInputPluginUtils.cast(record[column["name"]], column["type"])
+            end
+            mock(@page_builder).add(values)
           end
 
-          mock(klass).search(soql) do
+          mock(@api).search(task["soql"]) { sfdc_response }
+          mock(@plugin).add_next_records(sfdc_response, 1)
+          mock(@page_builder).finish
+          capture { @plugin.run }
+        end
+
+        def test_page_builder_add_called_records_count_times
+          mock(@page_builder).add(anything).times(sfdc_response["records"].length)
+
+          mock(@api).search(task["soql"]) { sfdc_response }
+          mock(@plugin).add_next_records(sfdc_response, 1)
+          mock(@page_builder).finish
+          capture { @plugin.run }
+        end
+
+        class TestAddNextRecords < self
+          setup :setup_plugin
+
+          def test_no_next
+            ret = @plugin.send(:add_next_records, {"done" => true}, 1)
+            assert_nil(ret)
+          end
+
+          def test_has_next
+            mock(@api).get(first_response["nextRecordsUrl"]) { second_response }
+            mock(@plugin).add_records(second_response["records"])
+
+            @plugin.send(:add_next_records, first_response, 1)
+          end
+
+          private
+
+          def first_response
             {
-              "totalSize" => 5,
               "done" => false,
-              "nextRecordsUrl" => next_records_url,
-              "records" => records_with_attributes[0..3],
+              "nextRecordsUrl" => "http://dummy.example.com/next",
             }
           end
 
-          mock(klass).get(next_records_url) do
+          def second_response
             {
-              "totalSize" => 5,
               "done" => true,
-              "records" => records_with_attributes[4..5],
+              "records" => ["hi"],
             }
           end
         end
 
-        page_builder = Object.new # add mock later
-        casted_records.each do |record|
-          mock(page_builder).add(record.values)
-        end
-        mock(page_builder).finish()
+        private
 
-        next_commit_diff = nil
-        capture do
-          next_commit_diff = SfdcInputPlugin.new(task, nil, nil, page_builder).run
+        def sfdc_response
+          {
+            "records" => records_with_attributes
+          }
         end
-
-        assert_equal({}, next_commit_diff)
       end
 
       def test_transaction
@@ -163,6 +196,16 @@ module Embulk
       end
 
       private
+
+      def setup_plugin
+        @api = Sfdc::Api.new
+        any_instance_of(Sfdc::Api) do |klass|
+          stub(klass).setup { @api }
+        end
+        @plugin = SfdcInputPlugin.new(task, nil, nil, @page_builder)
+        @page_builder = Object.new
+        stub(@plugin).page_builder { @page_builder }
+      end
 
       def task
         {
