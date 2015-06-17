@@ -67,9 +67,11 @@ module Embulk
         logger.debug "Start to add records...(total #{response["totalSize"]} records)"
         add_records(response["records"])
 
-        add_next_records(response)
+        add_next_records(response, 1)
 
         page_builder.finish
+
+        logger.debug "Added all records."
 
         commit_report = {}
         return commit_report
@@ -91,15 +93,16 @@ module Embulk
         !!(metadata["queryable"] && metadata["searchable"])
       end
 
-      def add_next_records(response)
+      def add_next_records(response, fetch_count)
         return if response["done"]
-        logger.debug "#{MAX_FETCHABLE_COUNT} records are added, but other records remains. Next #{MAX_FETCHABLE_COUNT} records are adding now.(total #{response["totalSize"]} records)"
+        logger.debug "Added #{MAX_FETCHABLE_COUNT * fetch_count}/#{response["totalSize"]} records."
         next_url = response["nextRecordsUrl"]
         response = @api.get(next_url)
 
         add_records(response["records"])
 
-        add_next_records(response)
+        fetch_count += 1
+        add_next_records(response, fetch_count)
       end
 
       def add_records(records)
