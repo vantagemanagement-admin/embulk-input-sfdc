@@ -12,7 +12,19 @@ module Embulk
         setup :setup_plugin
 
         def test_run_through
+          stub(@plugin).preview? { false }
+
           mock(@api).search(task["soql"]) { sfdc_response }
+          mock(@plugin).add_records(sfdc_response["records"])
+          mock(@plugin).add_next_records(sfdc_response, 1)
+          mock(@page_builder).finish
+          silence { @plugin.run }
+        end
+
+        def test_preview_through
+          stub(@plugin).preview? { true }
+
+          mock(@api).search(task["soql"] + " LIMIT #{SfdcInputPlugin::PREVIEW_RECORDS_COUNT}") { sfdc_response }
           mock(@plugin).add_records(sfdc_response["records"])
           mock(@plugin).add_next_records(sfdc_response, 1)
           mock(@page_builder).finish
