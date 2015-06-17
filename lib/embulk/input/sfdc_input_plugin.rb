@@ -101,8 +101,7 @@ module Embulk
 
         add_records(response["records"])
 
-        fetch_count += 1
-        add_next_records(response, fetch_count)
+        add_next_records(response, fetch_count + 1)
       end
 
       def add_records(records)
