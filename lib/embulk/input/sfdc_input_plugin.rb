@@ -8,6 +8,8 @@ module Embulk
     class SfdcInputPlugin < InputPlugin
       Plugin.register_input("sfdc", self)
 
+      MAX_FETCHABLE_COUNT = 2000
+
       def self.transaction(config, &control)
         task = {}
 
@@ -91,7 +93,7 @@ module Embulk
 
       def add_next_records(response)
         return if response["done"]
-        logger.debug "2000 records are added, but other records remains. Next 2000 records are adding now.(total #{response["totalSize"]} records)"
+        logger.debug "#{MAX_FETCHABLE_COUNT} records are added, but other records remains. Next #{MAX_FETCHABLE_COUNT} records are adding now.(total #{response["totalSize"]} records)"
         next_url = response["nextRecordsUrl"]
         response = @api.get(next_url)
 
