@@ -232,7 +232,7 @@ module Embulk
       end
 
       def login_url
-        "https://login-sfdc.com"
+        "https://login-sfdc.example.com"
       end
 
       def config
@@ -257,11 +257,11 @@ module Embulk
       end
 
       def soql
-        "SELECT Id, IsDeleted, Name, CreatedDate from manyo__c"
+        "SELECT Id, IsDeleted, Name, CreatedDate FROM manyo__c"
       end
 
       def instance_url
-        "https://instance-url.com"
+        "https://instance-url.example.com"
       end
 
       def version_path
@@ -269,7 +269,7 @@ module Embulk
       end
 
       def next_records_url
-        "https://next-records-hoge.com"
+        "https://next-records-hoge.example.com"
       end
 
       def records_with_attributes

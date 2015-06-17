@@ -156,7 +156,7 @@ module Embulk
         private
 
         def login_url
-          "https://login-sfdc.com"
+          "https://login-sfdc.example.com"
         end
 
         def config
@@ -187,7 +187,7 @@ module Embulk
         end
 
         def instance_url
-          "https://instance-url.com"
+          "https://instance-url.example.com"
         end
 
         def version_path
