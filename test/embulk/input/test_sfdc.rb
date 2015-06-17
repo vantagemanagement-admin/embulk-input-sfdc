@@ -131,7 +131,7 @@ module Embulk
         def test_guess
           mock(@api).get_metadata(@config.param("target", :string)) { metadata }
           soql = SfdcInputPluginUtils.build_soql(config["target"], metadata)
-          mock(@api).search("#{soql} LIMIT 5") { sobjects }
+          mock(@api).search("#{soql} LIMIT #{SfdcInputPlugin::GUESS_RECORDS_COUNT}") { sobjects }
 
           result = SfdcInputPlugin.guess(@config)
           assert_equal(soql, result["soql"])

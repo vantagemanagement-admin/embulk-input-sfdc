@@ -8,6 +8,7 @@ module Embulk
     class SfdcInputPlugin < InputPlugin
       Plugin.register_input("sfdc", self)
 
+      GUESS_RECORDS_COUNT = 30
       MAX_FETCHABLE_COUNT = 2000
 
       def self.transaction(config, &control)
@@ -48,7 +49,7 @@ module Embulk
         raise "Target #{target} can't be searched." unless searchable_target?(metadata)
 
         soql = SfdcInputPluginUtils.build_soql(target, metadata)
-        sobjects = api.search("#{soql} LIMIT 5")
+        sobjects = api.search("#{soql} LIMIT #{GUESS_RECORDS_COUNT}")
 
         {
           "soql" => soql,
