@@ -8,8 +8,11 @@ module Embulk
           @api = Sfdc::Api.new
         end
 
-        def test_initialize
+        def test_initialize_client
           assert_true(@api.client.is_a?(HTTPClient))
+        end
+
+        def test_initialize_default_header
           assert_equal({Accept: 'application/json; charset=UTF-8'}, @api.client.default_header)
         end
 
@@ -153,7 +156,7 @@ module Embulk
         private
 
         def login_url
-          "https://login-sfdc.com"
+          "https://login-sfdc.example.com"
         end
 
         def config
@@ -184,7 +187,7 @@ module Embulk
         end
 
         def instance_url
-          "https://instance-url.com"
+          "https://instance-url.example.com"
         end
 
         def version_path
