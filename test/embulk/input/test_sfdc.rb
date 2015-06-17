@@ -11,7 +11,7 @@ module Embulk
       class RunTest < self
         setup :setup_plugin
 
-        def test_run
+        def test_run_through
           mock(@api).search(task["soql"]) { sfdc_response }
           mock(@plugin).add_records(sfdc_response["records"])
           mock(@plugin).add_next_records(sfdc_response, 1)
@@ -19,27 +19,26 @@ module Embulk
           silence { @plugin.run }
         end
 
-        def test_page_builder_add_with_formatted_record
-          SfdcInputPluginUtils.extract_records(records_with_attributes).each do |record|
-            values = task["schema"].collect do |column|
-              SfdcInputPluginUtils.cast(record[column["name"]], column["type"])
+        class TestAddRecords < self
+          def test_page_builder_add_with_formatted_record
+            casted_records.each do |values|
+              mock(@page_builder).add(values)
             end
-            mock(@page_builder).add(values)
+
+            stub(@api).search(task["soql"]) { sfdc_response }
+            stub(@plugin).add_next_records(sfdc_response, 1)
+            stub(@page_builder).finish
+            silence { @plugin.run }
           end
 
-          mock(@api).search(task["soql"]) { sfdc_response }
-          mock(@plugin).add_next_records(sfdc_response, 1)
-          mock(@page_builder).finish
-          silence { @plugin.run }
-        end
+          def test_page_builder_add_called_records_count_times
+            mock(@page_builder).add(anything).times(sfdc_response["records"].length)
 
-        def test_page_builder_add_called_records_count_times
-          mock(@page_builder).add(anything).times(sfdc_response["records"].length)
-
-          mock(@api).search(task["soql"]) { sfdc_response }
-          mock(@plugin).add_next_records(sfdc_response, 1)
-          mock(@page_builder).finish
-          silence { @plugin.run }
+            stub(@api).search(task["soql"]) { sfdc_response }
+            stub(@plugin).add_next_records(sfdc_response, 1)
+            stub(@page_builder).finish
+            silence { @plugin.run }
+          end
         end
 
         # following tests direct call `add_next_records` method, don't test via `run` method.
@@ -49,15 +48,24 @@ module Embulk
           setup :setup_plugin
 
           def test_no_next
-            ret = @plugin.send(:add_next_records, {"done" => true}, 1)
-            assert_nil(ret)
+            actual = @plugin.send(:add_next_records, {"done" => true}, 1)
+            assert_nil(actual)
           end
 
-          def test_has_next
-            mock(@api).get(first_response["nextRecordsUrl"]) { second_response }
-            mock(@plugin).add_records(second_response["records"])
+          class TestAddNextRecordsHasNext < self
+            def test_api_get_called
+              mock(@api).get(first_response["nextRecordsUrl"]) { second_response }
+              stub(@plugin).add_records(second_response["records"])
 
-            @plugin.send(:add_next_records, first_response, 1)
+              @plugin.send(:add_next_records, first_response, 1)
+            end
+
+            def test_add_records_with_second_response
+              stub(@api).get(first_response["nextRecordsUrl"]) { second_response }
+              mock(@plugin).add_records(second_response["records"])
+
+              @plugin.send(:add_next_records, first_response, 1)
+            end
           end
 
           private
@@ -288,17 +296,10 @@ module Embulk
       end
 
       def casted_records
-        records.map do |record|
-          casted_record = {}
-          record.map do |(key, value)|
-            # NOTE: records includs not String value("CreatedDate") so
-            #       it should be casted, but other values will be included,
-            #       you should use 'case' sentence.
-            value = Time.parse(value) if key == "CreatedDate"
-            casted_record[key] = value
+        SfdcInputPluginUtils.extract_records(records_with_attributes).map do |record|
+          task["schema"].collect do |column|
+            SfdcInputPluginUtils.cast(record[column["name"]], column["type"])
           end
-
-          casted_record
         end
       end
     end
