@@ -9,6 +9,7 @@ module Embulk
       Plugin.register_input("sfdc", self)
 
       GUESS_RECORDS_COUNT = 30
+      PREVIEW_RECORDS_COUNT = 15
       MAX_FETCHABLE_COUNT = 2000
 
       def self.transaction(config, &control)
@@ -64,6 +65,7 @@ module Embulk
       end
 
       def run
+        @soql += " LIMIT #{PREVIEW_RECORDS_COUNT}" if preview?
         response = @api.search(@soql)
         logger.debug "Start to add records...(total #{response["totalSize"]} records)"
         add_records(response["records"])
@@ -79,6 +81,16 @@ module Embulk
       end
 
       private
+
+      def preview?
+        # NOTE: This is workaround for "org.embulk.spi.Exec.isPreview"
+        # TODO: Extract process for preview command to method
+        begin
+          org.embulk.spi.Exec.session().isPreview()
+        rescue java.lang.NullPointerException => e
+          false
+        end
+      end
 
       def self.embulk_config_to_hash(config)
         {
