@@ -25,19 +25,21 @@ module OutputCapture
     case output
     when :out
       $stdout = ruby_buf
+      System.setOut(PrintStream.new(java_buf))
     when :err
       $stderr = ruby_buf
+      System.setErr(PrintStream.new(java_buf))
     end
-    System.setOut(PrintStream.new(java_buf))
 
     [block.call, ruby_buf.string + java_buf.toString]
   ensure
-    System.setOut(java_original_stream)
     case output
     when :out
       $stdout = ruby_original_stream
+      System.setOut(java_original_stream)
     when :err
       $stderr = ruby_original_stream
+      System.setErr(java_original_stream)
     end
   end
 end
