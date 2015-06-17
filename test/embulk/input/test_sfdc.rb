@@ -42,6 +42,9 @@ module Embulk
           silence { @plugin.run }
         end
 
+        # following tests direct call `add_next_records` method, don't test via `run` method.
+        # because `mock(@plugin).add_next_records` completely replace that method implementation
+        # so can't mock/stub `add_next_records` for recursive call testing
         class TestAddNextRecords < self
           setup :setup_plugin
 
