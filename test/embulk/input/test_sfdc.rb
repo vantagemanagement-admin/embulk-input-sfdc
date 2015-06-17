@@ -213,9 +213,8 @@ module Embulk
         any_instance_of(Sfdc::Api) do |klass|
           stub(klass).setup { @api }
         end
-        @plugin = SfdcInputPlugin.new(task, nil, nil, @page_builder)
         @page_builder = Object.new
-        stub(@plugin).page_builder { @page_builder }
+        @plugin = SfdcInputPlugin.new(task, nil, nil, @page_builder)
       end
 
       def task
