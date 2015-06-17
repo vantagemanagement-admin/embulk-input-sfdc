@@ -1,5 +1,18 @@
 module OutputCapture
   def capture(output = :out, &block)
+    _, out = swap_io(output, &block)
+    out
+  end
+
+  def silence(&block)
+    block_result = nil
+    swap_io(:out) do
+      block_result,_ = swap_io(:err, &block)
+    end
+    block_result
+  end
+
+  def swap_io(output = :out, &block)
     java_import 'java.io.PrintStream'
     java_import 'java.io.ByteArrayOutputStream'
     java_import 'java.lang.System'
@@ -17,9 +30,7 @@ module OutputCapture
     end
     System.setOut(PrintStream.new(java_buf))
 
-    block.call
-
-    ruby_buf.string + java_buf.toString
+    [block.call, ruby_buf.string + java_buf.toString]
   ensure
     System.setOut(java_original_stream)
     case output

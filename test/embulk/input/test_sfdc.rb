@@ -16,7 +16,7 @@ module Embulk
           mock(@plugin).add_records(sfdc_response["records"])
           mock(@plugin).add_next_records(sfdc_response, 1)
           mock(@page_builder).finish
-          capture { @plugin.run }
+          silence { @plugin.run }
         end
 
         def test_page_builder_add_with_formatted_record
@@ -30,7 +30,7 @@ module Embulk
           mock(@api).search(task["soql"]) { sfdc_response }
           mock(@plugin).add_next_records(sfdc_response, 1)
           mock(@page_builder).finish
-          capture { @plugin.run }
+          silence { @plugin.run }
         end
 
         def test_page_builder_add_called_records_count_times
@@ -39,7 +39,7 @@ module Embulk
           mock(@api).search(task["soql"]) { sfdc_response }
           mock(@plugin).add_next_records(sfdc_response, 1)
           mock(@page_builder).finish
-          capture { @plugin.run }
+          silence { @plugin.run }
         end
 
         class TestAddNextRecords < self
