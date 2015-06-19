@@ -12,7 +12,19 @@ module Embulk
         setup :setup_plugin
 
         def test_run_through
+          stub(@plugin).preview? { false }
+
           mock(@api).search(task["soql"]) { sfdc_response }
+          mock(@plugin).add_records(sfdc_response["records"])
+          mock(@plugin).add_next_records(sfdc_response, 1)
+          mock(@page_builder).finish
+          silence { @plugin.run }
+        end
+
+        def test_preview_through
+          stub(@plugin).preview? { true }
+
+          mock(@api).search(task["soql"] + " LIMIT #{SfdcInputPlugin::PREVIEW_RECORDS_COUNT}") { sfdc_response }
           mock(@plugin).add_records(sfdc_response["records"])
           mock(@plugin).add_next_records(sfdc_response, 1)
           mock(@page_builder).finish
@@ -131,7 +143,7 @@ module Embulk
         def test_guess
           mock(@api).get_metadata(@config.param("target", :string)) { metadata }
           soql = SfdcInputPluginUtils.build_soql(config["target"], metadata)
-          mock(@api).search("#{soql} LIMIT 5") { sobjects }
+          mock(@api).search("#{soql} LIMIT #{SfdcInputPlugin::GUESS_RECORDS_COUNT}") { sobjects }
 
           result = SfdcInputPlugin.guess(@config)
           assert_equal(soql, result["soql"])
