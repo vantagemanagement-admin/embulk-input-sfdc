@@ -1,8 +1,6 @@
-require File.expand_path("../lib/embulk/input/sfdc/version.rb", __FILE__)
-
 Gem::Specification.new do |spec|
   spec.name          = "embulk-input-sfdc"
-  spec.version       = Embulk::Input::Sfdc::VERSION
+  spec.version       = "0.0.2"
   spec.authors       = ["yoshihara", "uu59"]
   spec.summary       = "Sfdc input plugin for Embulk"
   spec.description   = "Loads records from Sfdc."
