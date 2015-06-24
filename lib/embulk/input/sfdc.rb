@@ -83,7 +83,6 @@ module Embulk
 
       def preview?
         # NOTE: This is workaround for "org.embulk.spi.Exec.isPreview"
-        # TODO: Extract process for preview command to method
         begin
           org.embulk.spi.Exec.session().isPreview()
         rescue java.lang.NullPointerException => e
@@ -128,8 +127,6 @@ module Embulk
         end
       end
 
-      # TODO: Replace Embulk::Logger after merging
-      # https://github.com/embulk/embulk/pull/200
       def self.logger
         Embulk.logger
       end
