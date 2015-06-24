@@ -227,6 +227,7 @@ module Embulk
         end
         @page_builder = Object.new
         @plugin = Sfdc.new(task, nil, nil, @page_builder)
+        stub(@plugin).logger { ::Logger.new(File::NULL) }
       end
 
       def task
