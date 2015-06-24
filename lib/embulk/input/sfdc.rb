@@ -82,9 +82,8 @@ module Embulk
       private
 
       def preview?
-        # NOTE: This is workaround for "org.embulk.spi.Exec.isPreview"
         begin
-          org.embulk.spi.Exec.session().isPreview()
+          org.embulk.spi.Exec.isPreview()
         rescue java.lang.NullPointerException => e
           false
         end
