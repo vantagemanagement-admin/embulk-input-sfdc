@@ -11,13 +11,15 @@ end
 namespace :release do
   desc "Add header of now version release to ChangeLog and bump up version"
   task :prepare do
+    # TODO: fix versioning
+
     root_dir = Pathname.new(File.expand_path("../", __FILE__))
     changelog_file = root_dir.join("CHANGELOG.md")
 
     system("git fetch origin")
 
     # detect merged PR
-    old_version = Embulk::Input::Sfdc::VERSION
+    old_version = "0.0.2" # FIXME
     pr_numbers = `git log v#{old_version}..origin/master --oneline`.scan(/#[0-9]+/)
 
     if !$?.success? || pr_numbers.empty?

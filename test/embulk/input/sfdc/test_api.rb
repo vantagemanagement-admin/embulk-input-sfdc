@@ -1,11 +1,11 @@
-require "embulk/input/sfdc/api"
+require "embulk/input/sfdc_api/api"
 
 module Embulk
   module Input
-    module Sfdc
+    module SfdcApi
       class ApiTest < Test::Unit::TestCase
         def setup
-          @api = Sfdc::Api.new
+          @api = SfdcApi::Api.new
         end
 
         def test_initialize_client
@@ -21,7 +21,7 @@ module Embulk
             mock(@api).authentication(login_url, config) { "access_token" }
             mock(@api).set_latest_version("access_token") { @api }
 
-            assert_true(@api.setup(login_url, config).instance_of?(Sfdc::Api))
+            assert_true(@api.setup(login_url, config).instance_of?(SfdcApi::Api))
           end
 
           def test_instance_url
@@ -128,7 +128,7 @@ module Embulk
               mock(res).body { result.to_json }
             end
 
-            assert_raise(Sfdc::ApiError) do
+            assert_raise(SfdcApi::ApiError) do
               @api.get(path, parameters)
             end
           end
@@ -147,7 +147,7 @@ module Embulk
               mock(res).body { result.to_json }
             end
 
-            assert_raise(Sfdc::InternalServerError) do
+            assert_raise(SfdcApi::InternalServerError) do
               @api.get(path, parameters)
             end
           end

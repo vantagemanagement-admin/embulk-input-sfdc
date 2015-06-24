@@ -3,7 +3,7 @@ require "pathname"
 
 module Embulk
   module Input
-    module Sfdc
+    module SfdcApi
       class ApiError < StandardError; end
       class InternalServerError < StandardError; end
 
@@ -87,9 +87,9 @@ module Embulk
 
             message << ": #{body['errorCode']}" if body["errorCode"]
             message << ": #{body['message']}" if body["message"]
-            raise Sfdc::ApiError, message
+            raise SfdcApi::ApiError, message
           when 500..599
-            raise Sfdc::InternalServerError, "Force.com REST API returns 500 (Internal Server Error). Please contact customer support of Force.com."
+            raise SfdcApi::InternalServerError, "Force.com REST API returns 500 (Internal Server Error). Please contact customer support of Force.com."
           end
         end
       end
