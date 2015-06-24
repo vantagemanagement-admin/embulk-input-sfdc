@@ -132,14 +132,7 @@ module Embulk
       # TODO: Replace Embulk::Logger after merging
       # https://github.com/embulk/embulk/pull/200
       def self.logger
-        @logger ||=
-          begin
-            logger = Logger.new($stdout)
-            logger.formatter = proc do |severity, datetime, progname, msg|
-              "#{datetime.strftime("%Y-%m-%d %H:%M:%S.%L %z")} [#{severity}] #{msg}\n"
-            end
-            logger
-          end
+        Embulk.logger
       end
 
       def logger
