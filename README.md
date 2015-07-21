@@ -17,7 +17,21 @@ Required Embulk version >= 0.6.12.
 * **Cleanup supported**: no
 * **Guess supported**: yes
 
-## Configuration
+## Setup
+
+### How to obtain OAuth Client ID and Client Secret
+
+You should create "Connected App" in SalesForce website.
+
+First, please visit "Setup" -> "App Setup" -> "Create" -> "Apps", scroll down to "Connected Apps" and click "New" button. Please create "Connected App" its "Enable OAuth Settings" is checked and "Selected OAuth Access" is "Full access (full)". Then, this plugin doesn't use "Callback URL" setting, so please specify dummy URL (e.g. http://localhost:4000) as it.
+
+Finally, please click you connected app name in "Connected Apps" page (visit "Setup" -> "App Setup" -> "Create" -> "Apps"). It will show "Consumer Key" (as "Client ID") and Consumer Secret (as "Client Secret").
+
+### NOTE: security token
+
+This plugin requires your "security token", but if you forget it, please visit "My Settings" -> "Personal" -> "Reset My Security Token", and reset it. (Please attend your API applications can't work well with old security token.)
+
+### Configuration
 
 - **username** username for Force.com REST API (string, required)
 - **password** password for Force.com REST API (string, required)
