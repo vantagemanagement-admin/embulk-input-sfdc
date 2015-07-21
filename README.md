@@ -23,9 +23,9 @@ Required Embulk version >= 0.6.12.
 
 You should create "Connected App" in SalesForce website.
 
-First, please visit "Setup" -> "App Setup" -> "Create" -> "Apps", scroll down to "Connected Apps" and click "New" button. Please create "Connected App" its "Enable OAuth Settings" is checked and "Selected OAuth Access" is "Full access (full)".
+First, please visit "Setup" -> "App Setup" -> "Create" -> "Apps", scroll down to "Connected Apps" and click "New" button. Please create "Connected App" its "Enable OAuth Settings" is checked and "Selected OAuth Access" is "Full access (full)". Then, this plugin doesn't use "Callback URL" setting, so you specify dummy URL (e.g. http://localhost:4000) as it.
 
-Then, please click you connected app name in "Connected Apps" page (visit "Setup" -> "App Setup" -> "Create" -> "Apps"). It will show "Consumer Key" (as "Client ID") and Consumer Secret (as "Client Secret").
+Finally, please click you connected app name in "Connected Apps" page (visit "Setup" -> "App Setup" -> "Create" -> "Apps"). It will show "Consumer Key" (as "Client ID") and Consumer Secret (as "Client Secret").
 
 ### NOTE: security token
 
