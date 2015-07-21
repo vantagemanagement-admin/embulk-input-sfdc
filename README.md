@@ -27,6 +27,10 @@ First, please visit "Setup" -> "App Setup" -> "Create" -> "Apps", scroll down to
 
 Then, please click you connected app name in "Connected Apps" page (visit "Setup" -> "App Setup" -> "Create" -> "Apps"). It will show "Consumer Key" (as "Client ID") and Consumer Secret (as "Client Secret").
 
+### NOTE: security token
+
+This plugin requires your "security token", but if you forget it, please visit "My Settings" -> "Personal" -> "Reset My Security Token", and reset it. (Please attend your API applications can't work well with old security token.)
+
 ### Configuration
 
 - **username** username for Force.com REST API (string, required)
