@@ -8,6 +8,40 @@ task :test do
   ruby("test/run-test.rb", "--use-color=yes")
 end
 
+desc "Generate gemfiles to test this plugin with released Embulk versions (since MIN_VER)"
+task :gemfiles do
+  min_ver = Gem::Version.new(ENV["MIN_VER"] || "0.6.12")
+  puts "Generate Embulk gemfiles from #{min_ver} to latest"
+
+  embulk_tags = JSON.parse(open("https://api.github.com/repos/embulk/embulk/tags").read)
+  embulk_versons = embulk_tags.map{|tag| Gem::Version.new(tag["name"][/v(.*)/, 1])}
+  latest_ver = embulk_versons.max
+
+  root_dir = Pathname.new(File.expand_path("../", __FILE__))
+  gemfiles_dir = root_dir.join("gemfiles")
+  Dir[gemfiles_dir.join("embulk-*")].each{|f| File.unlink(f)}
+  erb_gemfile = ERB.new(gemfiles_dir.join("template.erb").read)
+
+  embulk_versons.sort.each do |version|
+    next if version < min_ver
+    File.open(gemfiles_dir.join("embulk-#{version}"), "w") do |f|
+      f.puts erb_gemfile.result(binding())
+    end
+  end
+  File.open(gemfiles_dir.join("embulk-latest"), "w") do |f|
+    version = "> #{min_ver}"
+    f.puts erb_gemfile.result(binding())
+  end
+  puts "Updated Gemfiles #{min_ver} to #{latest_ver}"
+
+  versions = Pathname.glob(gemfiles_dir.join("embulk-*")).map(&:basename)
+  erb_travis = ERB.new(root_dir.join(".travis.yml.erb").read, nil, "-")
+  File.open(root_dir.join(".travis.yml"), "w") do |f|
+    f.puts erb_travis.result(binding())
+  end
+  puts "Updated .travis.yml"
+end
+
 namespace :release do
   desc "Add header of now version release to ChangeLog and bump up version"
   task :prepare do
