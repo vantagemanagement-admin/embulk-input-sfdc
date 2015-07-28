@@ -14,15 +14,15 @@ task :gemfiles do
   puts "Generate Embulk gemfiles from #{min_version} to latest"
 
   embulk_tags = JSON.parse(open("https://api.github.com/repos/embulk/embulk/tags").read)
-  embulk_versons = embulk_tags.map{|tag| Gem::Version.new(tag["name"][/v(.*)/, 1])}
-  latest_version = embulk_versons.max
+  embulk_versions = embulk_tags.map{|tag| Gem::Version.new(tag["name"][/v(.*)/, 1])}
+  latest_version = embulk_versions.max
 
   root_dir = Pathname.new(File.expand_path("../", __FILE__))
   gemfiles_dir = root_dir.join("gemfiles")
   Dir[gemfiles_dir.join("embulk-*")].each{|f| File.unlink(f)}
   erb_gemfile = ERB.new(gemfiles_dir.join("template.erb").read)
 
-  embulk_versons.sort.each do |version|
+  embulk_versions.sort.each do |version|
     next if version < min_version
     File.open(gemfiles_dir.join("embulk-#{version}"), "w") do |f|
       f.puts erb_gemfile.result(binding())
