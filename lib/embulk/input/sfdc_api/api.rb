@@ -42,14 +42,7 @@ module Embulk
 
         private
 
-        def authentication(login_url, _config)
-          # NOTE: At SfdcInputPlugin#init, we use Symbol as each key
-          #       for task (Hash), but at SfdcInputPlugin#run, task
-          #       has them as String...:(
-          #       So, I translate keys from String to Symbol
-          config = {}
-          _config.each { |key, value| config[key.to_sym] = value }
-
+        def authentication(login_url, config)
           params = {
             grant_type: 'password',
             client_id: config[:client_id],
