@@ -24,7 +24,7 @@ module Embulk
         end
 
         def get(path, parameters={})
-          response = catch_config_error do
+          response = catch_unretryable_error do
             client.get(path, parameters)
           end
           body = JSON.parse(response.body)
@@ -43,7 +43,7 @@ module Embulk
 
         private
 
-        def catch_config_error(&block)
+        def catch_unretryable_error(&block)
           # if can't resolve a problem with retry, should raise ConfigError to tell Embulk
           begin
             yield
@@ -68,7 +68,7 @@ module Embulk
             password: config[:password] + config[:security_token]
           }
 
-          oauth_response = catch_config_error do
+          oauth_response = catch_unretryable_error do
             @client.post(URI.join(login_url, "services/oauth2/token").to_s, params)
           end
           oauth = JSON.parse(oauth_response.body)
