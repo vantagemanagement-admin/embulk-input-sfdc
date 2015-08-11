@@ -128,7 +128,7 @@ module Embulk
               mock(res).body { result.to_json }
             end
 
-            assert_raise(SfdcApi::ApiError) do
+            assert_raise(Embulk::ConfigError) do
               @api.get(path, parameters)
             end
           end
