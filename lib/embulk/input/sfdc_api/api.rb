@@ -48,7 +48,7 @@ module Embulk
           begin
             yield
           rescue SocketError => e # probably login_url is wrong
-            raise ConfigError, e
+            raise ConfigError, "SocketError: #{e.message}"
           end
         end
 
