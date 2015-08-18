@@ -1,5 +1,7 @@
 ## 0.0.4 - 2015-08-18
 
+**Embulk 0.6.13+ is required since this version**
+
 * [enhancement] raise ConfigError if config.yml is wrong (retry is unneeded) [#27](https://github.com/treasure-data/embulk-input-sfdc/pull/27)
 * [enhancement] Improve config.param validations by ConfigError [#25](https://github.com/treasure-data/embulk-input-sfdc/pull/25)
 * [maintenance] Brush up some code [#24](https://github.com/treasure-data/embulk-input-sfdc/pull/24) [#26](https://github.com/treasure-data/embulk-input-sfdc/pull/26)
