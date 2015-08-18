@@ -119,7 +119,7 @@ module Embulk
 
         records.each do |record|
           values = @schema.collect do |column|
-            SfdcInputPluginUtils.cast(record[column["name"]], column["type"])
+            record[column["name"]]
           end
 
           page_builder.add(values)

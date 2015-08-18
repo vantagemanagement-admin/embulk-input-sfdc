@@ -33,7 +33,7 @@ module Embulk
 
         class TestAddRecords < self
           def test_page_builder_add_with_formatted_record
-            casted_records.each do |values|
+            formatted_records.each do |values|
               mock(@page_builder).add(values)
             end
 
@@ -307,10 +307,10 @@ module Embulk
         end
       end
 
-      def casted_records
+      def formatted_records
         SfdcInputPluginUtils.extract_records(records_with_attributes).map do |record|
           task["schema"].collect do |column|
-            SfdcInputPluginUtils.cast(record[column["name"]], column["type"])
+            record[column["name"]]
           end
         end
       end
