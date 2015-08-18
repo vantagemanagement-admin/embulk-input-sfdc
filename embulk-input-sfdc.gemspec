@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = "embulk-input-sfdc"
-  spec.version       = "0.0.3"
+  spec.version       = "0.0.4"
   spec.authors       = ["yoshihara", "uu59"]
   spec.summary       = "Sfdc input plugin for Embulk"
   spec.description   = "Loads records from Sfdc."
@@ -16,7 +16,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'httpclient', ['~> 2.6.0']
   spec.add_development_dependency 'bundler', ['~> 1.0']
   spec.add_development_dependency 'rake', ['>= 10.0']
-  spec.add_development_dependency 'embulk', ['>= 0.6.12', '< 1.0']
+  spec.add_development_dependency 'embulk', ['>= 0.6.13', "!= 0.6.22", '< 1.0']
   spec.add_development_dependency 'pry'
   spec.add_development_dependency 'test-unit'
   spec.add_development_dependency 'test-unit-rr'
