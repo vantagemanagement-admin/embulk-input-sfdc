@@ -119,7 +119,11 @@ module Embulk
 
         records.each do |record|
           values = @schema.collect do |column|
-            SfdcInputPluginUtils.cast(record[column["name"]], column["type"])
+            val = record[column["name"]]
+            if val.is_a?(Hash)
+              val = val.to_s
+            end
+            val
           end
 
           page_builder.add(values)

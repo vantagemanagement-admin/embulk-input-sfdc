@@ -78,24 +78,4 @@ class EmbulkInputPluginUtilsTest < Test::Unit::TestCase
     soql = Embulk::Input::SfdcInputPluginUtils.build_soql(target, metadata)
     assert_equal("SELECT foo,bar FROM #{target}", soql)
   end
-
-  data do
-    {
-      "nil" => [nil, [nil, :string]],
-      "integer_to_string" => ["123", [123, :string]],
-      "integer_to_long" => [123, [123, :long]],
-      "integer_to_double" => [123.0, [123, :double]],
-      "string_to_timestamp" => [Time.new(2015, 3, 1, 0, 12, 0), ["2015-03-01T00:12:00", :timestamp]],
-      "integer_to_boolean" => [true, [123, :boolean]],
-    }
-  end
-
-  def test_cast(data)
-    expected, actual = data
-    value, type = actual
-
-    casted_value = Embulk::Input::SfdcInputPluginUtils.cast(value, type)
-
-    assert_equal(expected, casted_value)
-  end
 end

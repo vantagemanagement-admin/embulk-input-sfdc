@@ -4,7 +4,6 @@ require "pathname"
 module Embulk
   module Input
     module SfdcApi
-      class ApiError < StandardError; end
       class InternalServerError < StandardError; end
 
       class Api
@@ -25,7 +24,9 @@ module Embulk
         end
 
         def get(path, parameters={})
-          response = client.get(path, parameters)
+          response = catch_unretryable_error do
+            client.get(path, parameters)
+          end
           body = JSON.parse(response.body)
 
           handle_error(body, response.status_code)
@@ -41,6 +42,15 @@ module Embulk
         end
 
         private
+
+        def catch_unretryable_error(&block)
+          # if can't resolve a problem with retry, should raise ConfigError to tell Embulk
+          begin
+            yield
+          rescue SocketError => e # probably login_url is wrong
+            raise ConfigError, "SocketError: #{e.message}"
+          end
+        end
 
         def authentication(login_url, _config)
           # NOTE: At SfdcInputPlugin#init, we use Symbol as each key
@@ -58,7 +68,9 @@ module Embulk
             password: config[:password] + config[:security_token]
           }
 
-          oauth_response = @client.post(URI.join(login_url, "services/oauth2/token").to_s, params)
+          oauth_response = catch_unretryable_error do
+            @client.post(URI.join(login_url, "services/oauth2/token").to_s, params)
+          end
           oauth = JSON.parse(oauth_response.body)
           handle_error(oauth, oauth_response.status_code)
 
@@ -87,7 +99,7 @@ module Embulk
 
             message << ": #{body['errorCode']}" if body["errorCode"]
             message << ": #{body['message']}" if body["message"]
-            raise SfdcApi::ApiError, message
+            raise ConfigError, message
           when 500..599
             raise SfdcApi::InternalServerError, "Force.com REST API returns 500 (Internal Server Error). Please contact customer support of Force.com."
           end
