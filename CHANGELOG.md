@@ -2,8 +2,7 @@
 
 * [enhancement] raise ConfigError if config.yml is wrong (retry is unneeded) [#27](https://github.com/treasure-data/embulk-input-sfdc/pull/27)
 * [enhancement] Improve config.param validations by ConfigError [#25](https://github.com/treasure-data/embulk-input-sfdc/pull/25)
-* [fix] Revert "Remove string to symbol transform" [#26](https://github.com/treasure-data/embulk-input-sfdc/pull/26)
-* [maintenance] Brush up some code [#24](https://github.com/treasure-data/embulk-input-sfdc/pull/24)
+* [maintenance] Brush up some code [#24](https://github.com/treasure-data/embulk-input-sfdc/pull/24) [#26](https://github.com/treasure-data/embulk-input-sfdc/pull/26)
 * [maintenance] Add setup to readme [#22](https://github.com/treasure-data/embulk-input-sfdc/pull/22)
 * [maintenance] Put all dependency gems into gemspec [#21](https://github.com/treasure-data/embulk-input-sfdc/pull/21)
 
