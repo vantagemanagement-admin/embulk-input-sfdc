@@ -51,6 +51,24 @@ module Embulk
             stub(@page_builder).finish
             silence { @plugin.run }
           end
+
+          def test_invalid_date
+            response = {
+              "records" => [
+                {
+                  "Id" => "a00280000010prfUAAQ",
+                  "IsDeleted" => false,
+                  "Name" => "owl10",
+                  "CreatedDate" => "Invalid Date",
+                }
+              ]
+            }
+            stub(@api).search(task["soql"]) { response }
+
+            assert_raise(ConfigError) do
+              @plugin.run
+            end
+          end
         end
 
         # following tests direct call `add_next_records` method, don't test via `run` method.
@@ -310,7 +328,11 @@ module Embulk
       def formatted_records
         SfdcInputPluginUtils.extract_records(records_with_attributes).map do |record|
           task["schema"].collect do |column|
-            record[column["name"]]
+            if column["name"] == "CreatedDate"
+              Time.parse(record["CreatedDate"])
+            else
+              record[column["name"]]
+            end
           end
         end
       end
