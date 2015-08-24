@@ -1,3 +1,6 @@
+## 0.0.5 - 2015-08-24
+* [enhancement] Convert timestamp value when preivew/run [#30](https://github.com/treasure-data/embulk-input-sfdc/pull/30)
+
 ## 0.0.4 - 2015-08-18
 
 **Embulk 0.6.13+ is required since this version**
