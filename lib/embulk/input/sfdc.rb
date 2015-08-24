@@ -120,14 +120,14 @@ module Embulk
         records.each do |record|
           values = @schema.collect do |column|
             val = record[column["name"]]
-            if val.is_a?(Hash)
-              val = val.to_s
-            elsif column["type"] == "timestamp" && val
+            if column["type"] == "timestamp" && val
               begin
-                val = Time.parse(val)
+                val = Time.parse(val.to_s)
               rescue ArgumentError => e # invalid date
                 raise ConfigError, "The value '#{val}' (as '#{column['name']}') is invalid time format"
               end
+            elsif val.is_a?(Hash)
+              val = val.to_s
             end
             val
           end

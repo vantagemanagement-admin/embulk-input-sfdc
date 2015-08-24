@@ -76,7 +76,7 @@ module Embulk
                   "IsDeleted" => false,
                   "Name" => "owl10",
                   "CreatedDate" => "2015-06-03T05:42:02.000+0000",
-                  "InvalidTimestamp" => "NO TIME",
+                  "InvalidTimestamp" => {"hash" => "NO TIME"},
                 }
               ]
             }
