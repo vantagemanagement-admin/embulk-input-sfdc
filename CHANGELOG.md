@@ -1,3 +1,8 @@
+## 0.0.6 - 2015-10-06
+
+* [enhancement] Supports embulk.0.7 [#33](https://github.com/treasure-data/embulk-input-sfdc/pull/33)
+* [maintenance] updated description of gemspec to be more descriptive [#32](https://github.com/treasure-data/embulk-input-sfdc/pull/32)
+
 ## 0.0.5 - 2015-08-24
 
 * [enhancement] Convert timestamp value when preivew/run [#30](https://github.com/treasure-data/embulk-input-sfdc/pull/30)
