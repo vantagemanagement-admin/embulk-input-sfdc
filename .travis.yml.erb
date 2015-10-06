@@ -6,6 +6,15 @@ rvm:
   - jruby-19mode
   - jruby-9.0.0.0
 
+before_install:
+  - |
+    # Currently, Travis can't treat jruby 9.0.1.0
+    if [[ ${TRAVIS_RUBY_VERSION} = "jruby-9.0.0.0" ]];then
+      rvm get head
+      rvm use jruby-9.0.1.0 --install
+      ruby -v
+    fi
+
 gemfile:
 <% versions.each do |file| -%>
   - gemfiles/<%= file %>
