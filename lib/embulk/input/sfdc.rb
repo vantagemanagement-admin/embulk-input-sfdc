@@ -124,7 +124,7 @@ module Embulk
               begin
                 val = Time.parse(val.to_s)
               rescue ArgumentError => e # invalid date
-                raise ConfigError, "The value '#{val}' (as '#{column['name']}') is invalid time format"
+                raise ConfigError.new "The value '#{val}' (as '#{column['name']}') is invalid time format"
               end
             elsif val.is_a?(Hash)
               val = val.to_s

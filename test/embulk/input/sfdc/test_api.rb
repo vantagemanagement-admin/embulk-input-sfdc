@@ -1,9 +1,12 @@
+require "override_assert_raise"
 require "embulk/input/sfdc_api/api"
 
 module Embulk
   module Input
     module SfdcApi
       class ApiTest < Test::Unit::TestCase
+        include OverrideAssertRaise
+
         def setup
           @api = SfdcApi::Api.new
         end

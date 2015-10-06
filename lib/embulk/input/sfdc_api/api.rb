@@ -48,7 +48,7 @@ module Embulk
           begin
             yield
           rescue SocketError => e # probably login_url is wrong
-            raise ConfigError, "SocketError: #{e.message}"
+            raise ConfigError.new "SocketError: #{e.message}"
           end
         end
 
@@ -99,7 +99,7 @@ module Embulk
 
             message << ": #{body['errorCode']}" if body["errorCode"]
             message << ": #{body['message']}" if body["message"]
-            raise ConfigError, message
+            raise ConfigError.new message
           when 500..599
             raise SfdcApi::InternalServerError, "Force.com REST API returns 500 (Internal Server Error). Please contact customer support of Force.com."
           end
