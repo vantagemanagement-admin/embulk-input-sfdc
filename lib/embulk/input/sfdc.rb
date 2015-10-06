@@ -33,7 +33,7 @@ module Embulk
       end
 
       def self.resume(task, columns, count, &control)
-        commit_reports = yield(task, columns, count)
+        task_reports = yield(task, columns, count)
 
         next_config_diff = {}
         return next_config_diff
@@ -75,8 +75,8 @@ module Embulk
 
         logger.debug "Added all records."
 
-        commit_report = {}
-        return commit_report
+        task_report = {}
+        return task_report
       end
 
       private
