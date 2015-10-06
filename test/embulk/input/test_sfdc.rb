@@ -1,5 +1,6 @@
 require "prepare_embulk"
 require "output_capture"
+require "override_assert_raise"
 require "embulk/input/sfdc"
 require "embulk/data_source"
 
@@ -7,6 +8,7 @@ module Embulk
   module Input
     class SfdcInputPluginTest < Test::Unit::TestCase
       include OutputCapture
+      include OverrideAssertRaise
 
       class RunTest < self
         setup :setup_plugin
@@ -83,7 +85,7 @@ module Embulk
 
             stub(@api).search(invalid_schema_task["soql"]) { response }
 
-            assert_raise(ConfigError) do
+            assert_raise(Embulk::ConfigError) do
               @plugin.run
             end
           end
