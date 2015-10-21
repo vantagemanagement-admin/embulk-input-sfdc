@@ -28,9 +28,7 @@ module Embulk
             client.get(path, parameters)
           end
           handle_error(response)
-          body = JSON.parse(response.body)
-
-          body
+          JSON.parse(response.body)
         end
 
         def get_metadata(sobject_name)
