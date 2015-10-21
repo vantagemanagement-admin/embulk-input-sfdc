@@ -117,7 +117,15 @@ module Embulk
             assert_equal(result, @api.get(path, parameters))
           end
 
-          def test_failure_with_404
+          data do
+            [
+              ["is json response", true],
+              ["is not json response", false]
+            ]
+          end
+          def test_failure_with_404(data)
+            is_json_response = data
+
             result = {
               "errorCode" => "NotFound",
               "message" => "This is not found message."
@@ -128,7 +136,13 @@ module Embulk
 
             mock(@api.client).get(path, parameters) do |res|
               mock(res).status_code { 404 }
-              mock(res).body { result.to_json }
+              stub(res).body {
+                if is_json_response
+                  result.to_json
+                else
+                  "<!doctype>\n non json string"
+                end
+              }
             end
 
             assert_raise(Embulk::ConfigError) do
@@ -136,7 +150,15 @@ module Embulk
             end
           end
 
-          def test_failure_with_500
+          data do
+            [
+              ["is json response", true],
+              ["is not json response", false]
+            ]
+          end
+          def test_failure_with_500(data)
+            is_json_response = data
+
             result = {
               "errorCode" => "InternalServerError",
               "message" => "This is Internal Server Error message."
@@ -147,7 +169,13 @@ module Embulk
 
             mock(@api.client).get(path, parameters) do |res|
               mock(res).status_code { 500 }
-              mock(res).body { result.to_json }
+              stub(res).body {
+                if is_json_response
+                  result.to_json
+                else
+                  "<!doctype>\n non json string"
+                end
+              }
             end
 
             assert_raise(SfdcApi::InternalServerError) do

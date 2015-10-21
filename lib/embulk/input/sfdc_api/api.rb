@@ -27,9 +27,9 @@ module Embulk
           response = catch_unretryable_error do
             client.get(path, parameters)
           end
+          handle_error(response)
           body = JSON.parse(response.body)
 
-          handle_error(body, response.status_code)
           body
         end
 
@@ -71,8 +71,8 @@ module Embulk
           oauth_response = catch_unretryable_error do
             @client.post(URI.join(login_url, "services/oauth2/token").to_s, params)
           end
+          handle_error(oauth_response)
           oauth = JSON.parse(oauth_response.body)
-          handle_error(oauth, oauth_response.status_code)
 
           client.base_url = oauth["instance_url"]
 
@@ -89,16 +89,22 @@ module Embulk
           self
         end
 
-        def handle_error(body, status_code)
-          # NOTE: Sometimes (on error) body is Array
-          body = body.first if body.is_a? Array
+        def handle_error(response)
+          code = response.status_code
 
-          case status_code
+          case code
           when 400..499
-            message = "StatusCode: #{status_code}"
+            message = "StatusCode: #{code}"
 
-            message << ": #{body['errorCode']}" if body["errorCode"]
-            message << ": #{body['message']}" if body["message"]
+            begin
+              body = JSON.parse(response.body)
+              message << ": #{body['errorCode']}" if body["errorCode"]
+              message << ": #{body['message']}" if body["message"]
+            rescue
+              # Sometimes SFDC returns non-json response
+              # https://github.com/treasure-data/embulk-input-sfdc/issues/35
+              message << ": #{response.body}"
+            end
             raise ConfigError.new message
           when 500..599
             raise SfdcApi::InternalServerError, "Force.com REST API returns 500 (Internal Server Error). Please contact customer support of Force.com."
