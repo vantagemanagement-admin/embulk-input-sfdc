@@ -119,30 +119,17 @@ module Embulk
 
           data do
             [
-              ["is json response", true],
-              ["is not json response", false]
+              ["is json response", {"errorCode" => "NotFound", "message" => "error"}.to_json],
+              ["is not json response", "<!doctype> this is not json"]
             ]
           end
-          def test_failure_with_404(data)
-            is_json_response = data
-
-            result = {
-              "errorCode" => "NotFound",
-              "message" => "This is not found message."
-            }
-
+          def test_failure_with_404(response_body)
             path = "failure"
             parameters = {"parameter" => "is not OK"}
 
             mock(@api.client).get(path, parameters) do |res|
               mock(res).status_code { 404 }
-              stub(res).body {
-                if is_json_response
-                  result.to_json
-                else
-                  "<!doctype>\n non json string"
-                end
-              }
+              stub(res).body { response_body }
             end
 
             assert_raise(Embulk::ConfigError) do
@@ -152,30 +139,17 @@ module Embulk
 
           data do
             [
-              ["is json response", true],
-              ["is not json response", false]
+              ["is json response", {"errorCode" => "InternalError", "message" => "error"}.to_json],
+              ["is not json response", "<!doctype> this is not json"]
             ]
           end
-          def test_failure_with_500(data)
-            is_json_response = data
-
-            result = {
-              "errorCode" => "InternalServerError",
-              "message" => "This is Internal Server Error message."
-            }
-
+          def test_failure_with_500(response_body)
             path = "failure"
             parameters = {"parameter" => "is not OK"}
 
             mock(@api.client).get(path, parameters) do |res|
               mock(res).status_code { 500 }
-              stub(res).body {
-                if is_json_response
-                  result.to_json
-                else
-                  "<!doctype>\n non json string"
-                end
-              }
+              stub(res).body { response_body }
             end
 
             assert_raise(SfdcApi::InternalServerError) do
