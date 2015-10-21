@@ -1,3 +1,8 @@
+## 0.0.7 - 2015-10-21
+
+* [enhancement] Better http error detection [#36](https://github.com/treasure-data/embulk-input-sfdc/pull/36)
+* [maintenance] Rename: commit_report -> task_report renamed by Embulk since 0.7 [#34](https://github.com/treasure-data/embulk-input-sfdc/pull/34)
+
 ## 0.0.6 - 2015-10-06
 
 * [enhancement] Supports embulk.0.7 [#33](https://github.com/treasure-data/embulk-input-sfdc/pull/33)
