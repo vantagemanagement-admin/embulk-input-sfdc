@@ -1,3 +1,4 @@
+require "perfect_retry"
 require "embulk/input/sfdc_api/api"
 require "embulk/input/sfdc_input_plugin_utils"
 
@@ -18,6 +19,8 @@ module Embulk
         task[:soql] = config.param("soql", :string)
 
         task[:config] = embulk_config_to_hash(config)
+        task[:retry_limit] = config.param("retry_limit", :integer, default: 5)
+        task[:retry_initial_wait_sec] = config.param("retry_initial_wait_sec", :integer, default: 1)
 
         task[:schema] = config.param("columns", :array)
         columns = []
@@ -61,11 +64,18 @@ module Embulk
         @api = SfdcApi::Api.new.setup(task["login_url"], task["config"])
         @schema = task["schema"]
         @soql = task["soql"]
+        @retryer = PerfectRetry.new do |config|
+          config.limit = task[:retry_limit]
+          config.sleep = proc{|n| task[:retry_initial_wait_sec] ** n}
+          config.dont_rescues = [Embulk::ConfigError]
+        end
       end
 
       def run
         @soql += " LIMIT #{PREVIEW_RECORDS_COUNT}" if preview?
-        response = @api.search(@soql)
+        response = @retryer.with_retry do
+          @api.search(@soql)
+        end
         logger.debug "Start to add records...(total #{response["totalSize"]} records)"
         add_records(response["records"])
 
@@ -107,7 +117,10 @@ module Embulk
         return if response["done"]
         logger.debug "Added #{MAX_FETCHABLE_COUNT * fetch_count}/#{response["totalSize"]} records."
         next_url = response["nextRecordsUrl"]
-        response = @api.get(next_url)
+
+        response = @retryer.with_retry do
+          @api.get(next_url)
+        end
 
         add_records(response["records"])
 
