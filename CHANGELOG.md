@@ -1,3 +1,7 @@
+## 0.1.0 - 2015-11-09
+
+* [enhancement] Add retry options and retry handling [#37](https://github.com/treasure-data/embulk-input-sfdc/pull/37)
+
 ## 0.0.7 - 2015-10-21
 
 * [enhancement] Better http error detection [#36](https://github.com/treasure-data/embulk-input-sfdc/pull/36)
