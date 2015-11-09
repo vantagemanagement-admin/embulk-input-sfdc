@@ -1,3 +1,4 @@
+require "perfect_retry"
 require "embulk/input/sfdc_api/api"
 require "embulk/input/sfdc_input_plugin_utils"
 
