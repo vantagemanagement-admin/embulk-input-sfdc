@@ -42,6 +42,8 @@ This plugin requires your "security token", but if you forget it, please visit "
 - **login_url** your login URL  (string, required)
 - **target** target SObject name(string, required)
 - **columns** target SObject attributes. You can generate this configuration by `guess` command (array, required)
+- **retry_initial_wait_sec**: Wait seconds for exponential backoff initial value (integer, default: 1)
+- **retry_limit**: Try to retry this times (integer, default: 5)
 
 ## Example
 
