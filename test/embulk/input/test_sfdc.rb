@@ -151,6 +151,8 @@ module Embulk
           soql: config["soql"],
           config: Sfdc.embulk_config_to_hash(embulk_config),
           schema: config["columns"],
+          retry_limit: 5,
+          retry_initial_wait_sec: 1,
         }
         columns = task[:schema].map do |col|
           Column.new(nil, col["name"], col["type"].to_sym, col["format"])
