@@ -21,6 +21,7 @@ module Embulk
         task[:config] = embulk_config_to_hash(config)
         task[:retry_limit] = config.param("retry_limit", :integer, default: 5)
         task[:retry_initial_wait_sec] = config.param("retry_initial_wait_sec", :integer, default: 1)
+        task[:last_fetched] = config.param("last_fetched", :string, default: nil)
 
         task[:schema] = config.param("columns", :array)
         columns = []
@@ -38,8 +39,7 @@ module Embulk
       def self.resume(task, columns, count, &control)
         task_reports = yield(task, columns, count)
 
-        next_config_diff = {}
-        return next_config_diff
+        return task_reports.first
       end
 
       def self.guess(config)
@@ -75,6 +75,10 @@ module Embulk
 
       def run
         @soql += " LIMIT #{PREVIEW_RECORDS_COUNT}" if preview?
+        if task[:last_fetched]
+          @last_fetched = @latest_updated = Time.parse(task[:last_fetched])
+        end
+
         response = @retryer.with_retry do
           @api.search(@soql)
         end
@@ -87,7 +91,9 @@ module Embulk
 
         Embulk.logger.debug "Added all records."
 
-        task_report = {}
+        task_report = {
+          last_fetched: @latest_updated.to_s
+        }
         return task_report
       end
 
@@ -133,6 +139,17 @@ module Embulk
         records = SfdcInputPluginUtils.extract_records(records)
 
         records.each do |record|
+          if record.has_key?("LastModifiedDate")
+            updated_at = Time.parse(record["LastModifiedDate"])
+            @latest_updated ||= updated_at
+            @latest_updated = [@latest_updated, updated_at].max
+
+            if @last_fetched && @last_fetched >= updated_at
+              Embulk.logger.warn "'#{updated_at}'(LastModifiedDate) is earlier than or equal to '#{@last_fetched}'(last_fetched). Skipped"
+              next
+            end
+          end
+
           values = @schema.collect do |column|
             val = record[column["name"]]
             if column["type"] == "timestamp" && val

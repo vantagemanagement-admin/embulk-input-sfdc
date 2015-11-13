@@ -153,6 +153,7 @@ module Embulk
           schema: config["columns"],
           retry_limit: 5,
           retry_initial_wait_sec: 1,
+          last_fetched: nil,
         }
         columns = task[:schema].map do |col|
           Column.new(nil, col["name"], col["type"].to_sym, col["format"])
@@ -162,12 +163,11 @@ module Embulk
         Sfdc.transaction(embulk_config, &control)
       end
 
-      def test_resume
-        called = false
-        control = proc { called = true }
+      def test_resume_task_reports
+        task_reports = [1, 2, 3]
+        control = proc { task_reports }
 
-        Sfdc.resume({dummy: :task}, {dummy: :columns}, 1, &control)
-        assert_true(called)
+        assert_equal task_reports.first, Sfdc.resume({dummy: :task}, {dummy: :columns}, 1, &control)
       end
 
       class GuessTest < self
