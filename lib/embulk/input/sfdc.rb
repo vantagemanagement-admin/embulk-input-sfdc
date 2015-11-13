@@ -68,6 +68,8 @@ module Embulk
           config.limit = task[:retry_limit]
           config.sleep = proc{|n| task[:retry_initial_wait_sec] ** n}
           config.dont_rescues = [Embulk::ConfigError]
+          config.logger = Embulk.logger
+          config.log_level = nil
         end
       end
 
@@ -76,14 +78,14 @@ module Embulk
         response = @retryer.with_retry do
           @api.search(@soql)
         end
-        logger.debug "Start to add records...(total #{response["totalSize"]} records)"
+        Embulk.logger.debug "Start to add records...(total #{response["totalSize"]} records)"
         add_records(response["records"])
 
         add_next_records(response, 1)
 
         page_builder.finish
 
-        logger.debug "Added all records."
+        Embulk.logger.debug "Added all records."
 
         task_report = {}
         return task_report
@@ -115,7 +117,7 @@ module Embulk
 
       def add_next_records(response, fetch_count)
         return if response["done"]
-        logger.debug "Added #{MAX_FETCHABLE_COUNT * fetch_count}/#{response["totalSize"]} records."
+        Embulk.logger.debug "Added #{MAX_FETCHABLE_COUNT * fetch_count}/#{response["totalSize"]} records."
         next_url = response["nextRecordsUrl"]
 
         response = @retryer.with_retry do
@@ -147,14 +149,6 @@ module Embulk
 
           page_builder.add(values)
         end
-      end
-
-      def self.logger
-        Embulk.logger
-      end
-
-      def logger
-        self.class.logger
       end
     end
   end
