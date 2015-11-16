@@ -44,6 +44,7 @@ This plugin requires your "security token", but if you forget it, please visit "
 - **columns** target SObject attributes. You can generate this configuration by `guess` command (array, required)
 - **retry_initial_wait_sec**: Wait seconds for exponential backoff initial value (integer, default: 1)
 - **retry_limit**: Try to retry this times (integer, default: 5)
+- **continue_from**: Only process records after this time. This option didn't filled or SOQL SELECT-clause doesn't contain `LastModifiedDate`, all fetched records are processed. (string, default: nil)
 
 ## Example
 
