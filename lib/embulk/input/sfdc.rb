@@ -21,7 +21,7 @@ module Embulk
         task[:config] = embulk_config_to_hash(config)
         task[:retry_limit] = config.param("retry_limit", :integer, default: 5)
         task[:retry_initial_wait_sec] = config.param("retry_initial_wait_sec", :integer, default: 1)
-        task[:last_fetched] = config.param("last_fetched", :string, default: nil)
+        task[:continue_from] = config.param("continue_from", :string, default: nil)
 
         task[:schema] = config.param("columns", :array)
         columns = []
@@ -75,8 +75,8 @@ module Embulk
 
       def run
         @soql += " LIMIT #{PREVIEW_RECORDS_COUNT}" if preview?
-        if task[:last_fetched]
-          @last_fetched = @latest_updated = Time.parse(task[:last_fetched])
+        if task[:continue_from]
+          @continue_from = @latest_updated = Time.parse(task[:continue_from])
         end
 
         response = @retryer.with_retry do
@@ -92,7 +92,7 @@ module Embulk
         Embulk.logger.debug "Added all records."
 
         task_report = {
-          last_fetched: @latest_updated.to_s
+          continue_from: @latest_updated.to_s
         }
         return task_report
       end
@@ -143,8 +143,8 @@ module Embulk
             updated_at = Time.parse(record["LastModifiedDate"])
             set_latest_updated_at(updated_at)
 
-            if @last_fetched && @last_fetched >= updated_at
-              Embulk.logger.warn "'#{updated_at}'(LastModifiedDate) is earlier than or equal to '#{@last_fetched}'(last_fetched). Skipped"
+            if @continue_from && @continue_from >= updated_at
+              Embulk.logger.warn "'#{updated_at}'(LastModifiedDate) is earlier than or equal to '#{@continue_from}'(continue_from). Skipped"
               next
             end
           end

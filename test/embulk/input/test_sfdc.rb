@@ -22,7 +22,7 @@ module Embulk
 
         def test_without_last_fetched
           t = task.dup
-          t.delete(:last_fetched)
+          t.delete(:continue_from)
           @plugin = Sfdc.new(t, nil, nil, @page_builder)
 
           stub(@api).search { response }
@@ -35,7 +35,7 @@ module Embulk
         end
 
         def test_with_last_fetched
-          t = task.merge(last_fetched: response["records"][1]["LastModifiedDate"])
+          t = task.merge(continue_from: response["records"][1]["LastModifiedDate"])
           @plugin = Sfdc.new(t, nil, nil, @page_builder)
 
           stub(@api).search { response }
@@ -50,7 +50,7 @@ module Embulk
         end
 
         def test_without_last_modified_date_record
-          t = task.merge(last_fetched: response["records"][1]["LastModifiedDate"])
+          t = task.merge(continue_from: response["records"][1]["LastModifiedDate"])
           @plugin = Sfdc.new(t, nil, nil, @page_builder)
 
           records = response.dup
@@ -228,7 +228,7 @@ module Embulk
           schema: config["columns"],
           retry_limit: 5,
           retry_initial_wait_sec: 1,
-          last_fetched: nil,
+          continue_from: nil,
         }
         columns = task[:schema].map do |col|
           Column.new(nil, col["name"], col["type"].to_sym, col["format"])
