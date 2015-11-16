@@ -21,6 +21,7 @@ module Embulk
         task[:config] = embulk_config_to_hash(config)
         task[:retry_limit] = config.param("retry_limit", :integer, default: 5)
         task[:retry_initial_wait_sec] = config.param("retry_initial_wait_sec", :integer, default: 1)
+        task[:continue_from] = config.param("continue_from", :string, default: nil)
 
         task[:schema] = config.param("columns", :array)
         columns = []
@@ -38,8 +39,7 @@ module Embulk
       def self.resume(task, columns, count, &control)
         task_reports = yield(task, columns, count)
 
-        next_config_diff = {}
-        return next_config_diff
+        return task_reports.first
       end
 
       def self.guess(config)
@@ -75,6 +75,10 @@ module Embulk
 
       def run
         @soql += " LIMIT #{PREVIEW_RECORDS_COUNT}" if preview?
+        if task[:continue_from]
+          @continue_from = @latest_updated = Time.parse(task[:continue_from])
+        end
+
         response = @retryer.with_retry do
           @api.search(@soql)
         end
@@ -87,7 +91,9 @@ module Embulk
 
         Embulk.logger.debug "Added all records."
 
-        task_report = {}
+        task_report = {
+          continue_from: @latest_updated.to_s
+        }
         return task_report
       end
 
@@ -133,21 +139,41 @@ module Embulk
         records = SfdcInputPluginUtils.extract_records(records)
 
         records.each do |record|
-          values = @schema.collect do |column|
-            val = record[column["name"]]
-            if column["type"] == "timestamp" && val
-              begin
-                val = Time.parse(val.to_s)
-              rescue ArgumentError => e # invalid date
-                raise ConfigError.new "The value '#{val}' (as '#{column['name']}') is invalid time format"
-              end
-            elsif val.is_a?(Hash)
-              val = val.to_s
+          if record.has_key?("LastModifiedDate")
+            updated_at = Time.parse(record["LastModifiedDate"])
+            set_latest_updated_at(updated_at)
+
+            if @continue_from && @continue_from >= updated_at
+              Embulk.logger.warn "'#{updated_at}'(LastModifiedDate) is earlier than or equal to '#{@continue_from}'(continue_from). Skipped"
+              next
             end
-            val
           end
 
+          values = record_to_values(record)
           page_builder.add(values)
+        end
+      end
+
+      def set_latest_updated_at(updated_at)
+        @latest_updated = [
+          @latest_updated || updated_at,
+          updated_at
+        ].max
+      end
+
+      def record_to_values(record)
+        @schema.collect do |column|
+          val = record[column["name"]]
+          if column["type"] == "timestamp" && val
+            begin
+              val = Time.parse(val.to_s)
+            rescue ArgumentError => e # invalid date
+              raise ConfigError.new "The value '#{val}' (as '#{column['name']}') is invalid time format"
+            end
+          elsif val.is_a?(Hash)
+            val = val.to_s
+          end
+          val
         end
       end
     end

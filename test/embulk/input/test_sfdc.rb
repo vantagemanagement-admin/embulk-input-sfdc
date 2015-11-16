@@ -10,6 +10,81 @@ module Embulk
       include OutputCapture
       include OverrideAssertRaise
 
+      class ScheduledExecutionTest < self
+        setup do
+          @api = SfdcApi::Api.new
+          any_instance_of(SfdcApi::Api) do |klass|
+            stub(klass).setup { @api }
+          end
+          @page_builder = Object.new
+          stub(Embulk.logger).debug {}
+        end
+
+        def test_without_last_fetched
+          t = task.dup
+          t.delete(:continue_from)
+          @plugin = Sfdc.new(t, nil, nil, @page_builder)
+
+          stub(@api).search { response }
+          stub(@plugin).add_next_records {}
+          stub(@page_builder).finish
+          mock(@page_builder).add(anything).times(response["records"].length)
+          mock(Embulk.logger).warn.never
+
+          @plugin.run
+        end
+
+        def test_with_last_fetched
+          t = task.merge(continue_from: response["records"][1]["LastModifiedDate"])
+          @plugin = Sfdc.new(t, nil, nil, @page_builder)
+
+          stub(@api).search { response }
+          stub(@plugin).add_next_records {}
+          stub(@page_builder).finish
+
+          # NOTE: record 1,2 will be skipped, only add 3
+          mock(Embulk.logger).warn(/Skipped/).times(2)
+          mock(@page_builder).add(anything).times(1)
+
+          @plugin.run
+        end
+
+        def test_without_last_modified_date_record
+          t = task.merge(continue_from: response["records"][1]["LastModifiedDate"])
+          @plugin = Sfdc.new(t, nil, nil, @page_builder)
+
+          records = response.dup
+          records["records"].each{|r| r.delete("LastModifiedDate") } 
+          stub(@api).search { records }
+          stub(@plugin).add_next_records {}
+          stub(@page_builder).finish
+
+          # NOTE: doesn't check LastModifiedDate
+          mock(@page_builder).add(anything).times(3)
+
+          @plugin.run
+        end
+
+        def response
+          {
+            "records" => [
+              {
+                "Id" => "1",
+                "LastModifiedDate" => "2000-01-01 00:00:00+09:00"
+              },
+              {
+                "Id" => "2",
+                "LastModifiedDate" => "2000-01-02 00:00:00+09:00"
+              },
+              {
+                "Id" => "3",
+                "LastModifiedDate" => "2000-01-03 00:00:00+09:00"
+              },
+            ]
+          }
+        end
+      end
+
       class RunTest < self
         setup :setup_plugin
 
@@ -153,6 +228,7 @@ module Embulk
           schema: config["columns"],
           retry_limit: 5,
           retry_initial_wait_sec: 1,
+          continue_from: nil,
         }
         columns = task[:schema].map do |col|
           Column.new(nil, col["name"], col["type"].to_sym, col["format"])
@@ -162,12 +238,11 @@ module Embulk
         Sfdc.transaction(embulk_config, &control)
       end
 
-      def test_resume
-        called = false
-        control = proc { called = true }
+      def test_resume_task_reports
+        task_reports = [1, 2, 3]
+        control = proc { task_reports }
 
-        Sfdc.resume({dummy: :task}, {dummy: :columns}, 1, &control)
-        assert_true(called)
+        assert_equal task_reports.first, Sfdc.resume({dummy: :task}, {dummy: :columns}, 1, &control)
       end
 
       class GuessTest < self
