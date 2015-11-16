@@ -1,3 +1,8 @@
+## 0.1.1 - 2015-11-16
+
+* [enhancement] Scheduled execution [#39](https://github.com/treasure-data/embulk-input-sfdc/pull/39)
+* [maintenance] Set retryer logger as Embulk.logger [#38](https://github.com/treasure-data/embulk-input-sfdc/pull/38)
+
 ## 0.1.0 - 2015-11-09
 
 * [enhancement] Add retry options and retry handling [#37](https://github.com/treasure-data/embulk-input-sfdc/pull/37)
