@@ -24,6 +24,7 @@ module Embulk
         task[:continue_from] = config.param("continue_from", :string, default: nil)
 
         task[:schema] = config.param("columns", :array)
+        task[:incremental] = config.param("incremental", :boolean, default: true)
         columns = []
 
         task[:schema].each do |column|
@@ -90,6 +91,8 @@ module Embulk
         page_builder.finish
 
         Embulk.logger.debug "Added all records."
+
+        return {} unless task[:incremental]
 
         task_report = {
           continue_from: @latest_updated.to_s

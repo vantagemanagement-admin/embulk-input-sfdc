@@ -229,6 +229,7 @@ module Embulk
           retry_limit: 5,
           retry_initial_wait_sec: 1,
           continue_from: nil,
+          incremental: true,
         }
         columns = task[:schema].map do |col|
           Column.new(nil, col["name"], col["type"].to_sym, col["format"])
