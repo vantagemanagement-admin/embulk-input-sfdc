@@ -45,6 +45,7 @@ This plugin requires your "security token", but if you forget it, please visit "
 - **retry_initial_wait_sec**: Wait seconds for exponential backoff initial value (integer, default: 1)
 - **retry_limit**: Try to retry this times (integer, default: 5)
 - **continue_from**: Only process records after this time. This option didn't filled or SOQL SELECT-clause doesn't contain `LastModifiedDate`, all fetched records are processed. (string, default: nil)
+- **incremental**: If false, `continue_from` in next.yml doesn't updated that means you always fetch all of data from SFDC with statically conditions. If true, `continue_from` updated in next.yml as above you'll fetch fresh data since last executed only. (boolean, default: true)
 
 ## Example
 
