@@ -92,7 +92,7 @@ module Embulk
 
         Embulk.logger.debug "Added all records."
 
-        return {} if task[:incremental]
+        return {} unless task[:incremental]
 
         task_report = {
           continue_from: @latest_updated.to_s
