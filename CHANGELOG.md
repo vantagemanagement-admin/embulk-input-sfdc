@@ -1,3 +1,7 @@
+## 0.1.2 - 2016-01-13
+* [maintenance] relax httpclient version [#40](https://github.com/treasure-data/embulk-input-sfdc/pull/40)
+* [enhancement] Add `incremental` option [#41](https://github.com/treasure-data/embulk-input-sfdc/pull/41)
+
 ## 0.1.1 - 2015-11-16
 
 * [enhancement] Scheduled execution [#39](https://github.com/treasure-data/embulk-input-sfdc/pull/39)
