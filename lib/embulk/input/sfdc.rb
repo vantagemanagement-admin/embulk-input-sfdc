@@ -24,7 +24,7 @@ module Embulk
         task[:continue_from] = config.param("continue_from", :string, default: nil)
 
         task[:schema] = config.param("columns", :array)
-        task[:incremental] = config.param("incremental", :boolean, default: true)
+        task[:incremental] = config.param("incremental", :bool, default: true)
         columns = []
 
         task[:schema].each do |column|
