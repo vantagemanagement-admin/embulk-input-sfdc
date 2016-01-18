@@ -1,3 +1,7 @@
+## 0.1.3 - 2016-01-18
+* [fixed] Fix `incremental` option when specified in config.yml
+
+
 ## 0.1.2 - 2016-01-13
 * [maintenance] relax httpclient version [#40](https://github.com/treasure-data/embulk-input-sfdc/pull/40)
 * [enhancement] Add `incremental` option [#41](https://github.com/treasure-data/embulk-input-sfdc/pull/41)
