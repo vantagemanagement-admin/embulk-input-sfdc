@@ -307,7 +307,7 @@ module Embulk
       data do
         {
           "queryable and searchable" => [true, {"queryable" => true, "searchable" => true}],
-          "queryable" => [false, {"queryable" => true}],
+          "queryable" => [true, {"queryable" => true}],
           "searchable" => [false, {"searchable" => true}],
           "none" => [false, {}],
         }
