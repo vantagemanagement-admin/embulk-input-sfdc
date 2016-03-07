@@ -1,3 +1,6 @@
+## 0.1.4 - 2016-03-07
+* [fixed] Check searchable is not needed to this plugin [#42](https://github.com/treasure-data/embulk-input-sfdc/pull/42)
+
 ## 0.1.3 - 2016-01-18
 * [fixed] Fix `incremental` option when specified in config.yml
 
