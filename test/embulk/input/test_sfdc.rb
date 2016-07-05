@@ -103,7 +103,7 @@ module Embulk
 
           mock(@api).search(task["soql"] + " LIMIT #{Sfdc::PREVIEW_RECORDS_COUNT}") { sfdc_response }
           mock(@plugin).add_records(sfdc_response["records"])
-          mock(@plugin).add_next_records(sfdc_response, 1)
+          mock(@plugin).add_next_records(sfdc_response, 1).never
           mock(@page_builder).finish
           silence { @plugin.run }
         end

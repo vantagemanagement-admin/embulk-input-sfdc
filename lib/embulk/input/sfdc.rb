@@ -86,7 +86,7 @@ module Embulk
         Embulk.logger.debug "Start to add records...(total #{response["totalSize"]} records)"
         add_records(response["records"])
 
-        add_next_records(response, 1)
+        add_next_records(response, 1) unless preview?
 
         page_builder.finish
 
@@ -125,17 +125,18 @@ module Embulk
       end
 
       def add_next_records(response, fetch_count)
-        return if response["done"]
-        Embulk.logger.debug "Added #{MAX_FETCHABLE_COUNT * fetch_count}/#{response["totalSize"]} records."
-        next_url = response["nextRecordsUrl"]
+        loop do
+          break if response["done"]
+          Embulk.logger.debug "Added #{MAX_FETCHABLE_COUNT * fetch_count}/#{response["totalSize"]} records."
+          next_url = response["nextRecordsUrl"]
 
-        response = @retryer.with_retry do
-          @api.get(next_url)
+          response = @retryer.with_retry do
+            @api.get(next_url)
+          end
+
+          add_records(response["records"])
+          fetch_count += 1
         end
-
-        add_records(response["records"])
-
-        add_next_records(response, fetch_count + 1)
       end
 
       def add_records(records)
