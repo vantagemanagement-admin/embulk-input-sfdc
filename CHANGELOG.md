@@ -1,3 +1,8 @@
+## 0.2.0 - 2016-07-05
+**This version drops old Embulk versions. Embulk version should be >= 0.8.7**
+
+* [enhancement] Memory efficient processing [#43](https://github.com/treasure-data/embulk-input-sfdc/pull/43)
+
 ## 0.1.4 - 2016-03-07
 * [fixed] Check searchable is not needed to this plugin [#42](https://github.com/treasure-data/embulk-input-sfdc/pull/42)
 
