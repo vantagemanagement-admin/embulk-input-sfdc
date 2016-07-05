@@ -11,7 +11,7 @@ This plugin uses Force.com REST API.
 
 ## Overview
 
-Required Embulk version >= 0.6.13.
+Required Embulk version >= 0.8.7
 
 * **Plugin type**: input
 * **Resume supported**: yes (since v0.1.1)
