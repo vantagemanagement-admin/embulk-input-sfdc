@@ -22,6 +22,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'test-unit'
   spec.add_development_dependency 'test-unit-rr'
   spec.add_development_dependency 'rr', "1.1.2" # FIXME: sometimes failed on 1.2.0..
+  spec.add_development_dependency 'simplecov'
   spec.add_development_dependency 'codeclimate-test-reporter'
   spec.add_development_dependency 'everyleaf-embulk_helper'
 
