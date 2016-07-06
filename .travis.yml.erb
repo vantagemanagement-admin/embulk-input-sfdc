@@ -19,6 +19,8 @@ before_install:
     ruby -v
     gem i bundler
 
+script: bundle exec rake cov
+
 gemfile:
 <% versions.each do |file| -%>
   - gemfiles/<%= file %>
