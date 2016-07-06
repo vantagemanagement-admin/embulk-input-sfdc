@@ -1,3 +1,6 @@
+## 0.2.1 - 2016-07-06
+* [enhancement] Display log for each page fetched to avoid silence on long running job [#44](https://github.com/treasure-data/embulk-input-sfdc/pull/44)
+
 ## 0.2.0 - 2016-07-05
 **This version drops old Embulk versions. Embulk version should be >= 0.8.7**
 
