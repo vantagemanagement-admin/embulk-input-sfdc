@@ -83,7 +83,7 @@ module Embulk
         response = @retryer.with_retry do
           @api.search(@soql)
         end
-        Embulk.logger.debug "Start to add records...(total #{response["totalSize"]} records)"
+        Embulk.logger.info "Start to add records...(total #{response["totalSize"]} records)"
         add_records(response["records"])
 
         add_next_records(response, 1) unless preview?
@@ -127,7 +127,7 @@ module Embulk
       def add_next_records(response, fetch_count)
         loop do
           break if response["done"]
-          Embulk.logger.debug "Added #{MAX_FETCHABLE_COUNT * fetch_count}/#{response["totalSize"]} records."
+          Embulk.logger.info "Fetched #{MAX_FETCHABLE_COUNT * fetch_count}/#{response["totalSize"]} records."
           next_url = response["nextRecordsUrl"]
 
           response = @retryer.with_retry do
