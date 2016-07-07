@@ -140,7 +140,7 @@ module Embulk
       end
 
       def add_records(records)
-        records = SfdcInputPluginUtils.extract_records(records)
+        records = SfdcInputPluginUtils.extract_records(records, @schema)
 
         records.each do |record|
           if record.has_key?("LastModifiedDate")

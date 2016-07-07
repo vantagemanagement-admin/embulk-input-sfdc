@@ -27,7 +27,7 @@ class EmbulkInputPluginUtilsTest < Test::Unit::TestCase
     assert_equal(expected, actual)
   end
 
-  def test_extract_records
+  def test_extract_records_without_schema
     json = [
       {
         "attributes" => {
@@ -114,6 +114,177 @@ class EmbulkInputPluginUtilsTest < Test::Unit::TestCase
        "Id" => "a0028000002prfUAAQ",
        "Name" => "cat",
        "renban__c" => "201506-1078",
+       "poetry__r" => {
+         "attributes" => {
+           "type" => "poetry__c",
+           "url"  => "/services/data/v2.0/sobjects/poetry__c/b0028000002prfUAAQ"
+         },
+         "Id" => "b0028000002prfUAAQ",
+         "Name" => "dog",
+         "kajin__r" => {
+           "attributes" => {
+             "type" => "kajin__c",
+             "url"  => "/services/data/v2.0/sobjects/kajin__c/d0028000002prfUAAQ"
+           },
+           "Id" => "d0028000002prfUAAQ",
+           "Name" => "semimaru",
+         }
+       },
+       "waka__c" => {
+         "totalSize" => 1,
+         "done" => true,
+         "records" => [
+           {
+             "attributes" => {
+               "type" => "waka__c",
+               "url"  => "/services/data/v2.0/sobjects/waka__c/c0028000002prfUAAQ"
+             },
+             "Id" => "c0028000002prfUAAQ",
+             "Name" => "pony"
+           }
+         ]
+       }
+      },
+      {
+        "Id" => "a0028000002prg8AAA",
+        "Name" => "cat5",
+        "renban__c" => "201506-1079",
+        "poetry__r" => {
+          "attributes" => {
+            "type" => "poetry__c",
+            "url"  => "/services/data/v2.0/sobjects/poetry__c/b0028000002prg8AAA"
+          },
+          "Id" => "b0028000002prg8AAA",
+          "Name" => "dog5",
+          "kajin__r" => {
+           "attributes" => {
+             "type" => "kajin__c",
+             "url"  => "/services/data/v2.0/sobjects/kajin__c/d0028000002prg8AAA"
+           },
+           "Id" => "d0028000002prg8AAA",
+           "Name" => "semimaru5",
+         }
+        },
+        "waka__c" => {
+          "totalSize" => 1,
+          "done" => true,
+          "records" => [
+            {
+              "attributes" => {
+                "type" => "waka__c",
+                "url"  => "/services/data/v2.0/sobjects/waka__c/c0028000002prg8AAA"
+              },
+              "Id" => "c0028000002prg8AAA",
+              "Name" => "pony5"
+            }
+          ]
+        }
+      }
+    ]
+
+    actual = Embulk::Input::SfdcInputPluginUtils.extract_records(json)
+
+    assert_equal(expected, actual)
+  end
+
+  def test_extract_records_without_schema_no_type_json
+    json = [
+      {
+        "attributes" => {
+          "type" => "manyo__c",
+          "url" => "/services/data/v2.0/sobjects/manyo__c/a0028000002prfUAAQ"
+        },
+       "Id" => "a0028000002prfUAAQ",
+       "Name" => "cat",
+       "renban__c" => "201506-1078",
+       "poetry__r" => {
+         "attributes" => {
+           "type" => "poetry__c",
+           "url"  => "/services/data/v2.0/sobjects/poetry__c/b0028000002prfUAAQ"
+         },
+         "Id" => "b0028000002prfUAAQ",
+         "Name" => "dog",
+         "kajin__r" => {
+           "attributes" => {
+             "type" => "kajin__c",
+             "url"  => "/services/data/v2.0/sobjects/kajin__c/d0028000002prfUAAQ"
+           },
+           "Id" => "d0028000002prfUAAQ",
+           "Name" => "semimaru",
+         }
+       },
+       "waka__c" => {
+         "totalSize" => 1,
+         "done" => true,
+         "records" => [
+           {
+             "attributes" => {
+               "type" => "waka__c",
+               "url"  => "/services/data/v2.0/sobjects/waka__c/c0028000002prfUAAQ"
+             },
+             "Id" => "c0028000002prfUAAQ",
+             "Name" => "pony"
+           }
+         ]
+       }
+      },
+      {
+        "attributes" => {
+          "type" => "manyo__c",
+          "url" => "/services/data/v2.0/sobjects/manyo__c/a0028000002prg8AAA"
+        },
+        "Id" => "a0028000002prg8AAA",
+        "Name" => "cat5",
+        "renban__c" => "201506-1079",
+        "poetry__r" => {
+          "attributes" => {
+            "type" => "poetry__c",
+            "url"  => "/services/data/v2.0/sobjects/poetry__c/b0028000002prg8AAA"
+          },
+          "Id" => "b0028000002prg8AAA",
+          "Name" => "dog5",
+          "kajin__r" => {
+           "attributes" => {
+             "type" => "kajin__c",
+             "url"  => "/services/data/v2.0/sobjects/kajin__c/d0028000002prg8AAA"
+           },
+           "Id" => "d0028000002prg8AAA",
+           "Name" => "semimaru5",
+         }
+        },
+        "waka__c" => {
+          "totalSize" => 1,
+          "done" => true,
+          "records" => [
+            {
+              "attributes" => {
+                "type" => "waka__c",
+                "url"  => "/services/data/v2.0/sobjects/waka__c/c0028000002prg8AAA"
+              },
+              "Id" => "c0028000002prg8AAA",
+              "Name" => "pony5"
+            }
+          ]
+        }
+      }
+    ]
+
+    schema = [
+      {"name" => "Id", "type" => "string"},
+      {"name" => "Name", "type" => "string"},
+      {"name" => "renban__c", "type" => "string"},
+      {"name" => "poetry__r.Id", "type" => "string"},
+      {"name" => "poetry__r.Name", "type" => "string"},
+      {"name" => "poetry__r.kajin__r.Id", "type" => "string"},
+      {"name" => "poetry__r.kajin__r.Name", "type" => "string"},
+      {"name" => "waka__c", "type" => "string"}
+    ]
+
+    expected = [
+      {
+       "Id" => "a0028000002prfUAAQ",
+       "Name" => "cat",
+       "renban__c" => "201506-1078",
        "poetry__r.Id" => "b0028000002prfUAAQ",
        "poetry__r.Name" => "dog",
        "poetry__r.kajin__r.Id" => "d0028000002prfUAAQ",
@@ -158,12 +329,180 @@ class EmbulkInputPluginUtilsTest < Test::Unit::TestCase
       }
     ]
 
-    actual = Embulk::Input::SfdcInputPluginUtils.extract_records(json)
+    actual = Embulk::Input::SfdcInputPluginUtils.extract_records(json, schema)
 
     assert_equal(expected, actual)
   end
 
-  def test_extract_parent_elements
+  def test_extract_records_without_schema_type_json
+    json = [
+      {
+        "attributes" => {
+          "type" => "manyo__c",
+          "url" => "/services/data/v2.0/sobjects/manyo__c/a0028000002prfUAAQ"
+        },
+       "Id" => "a0028000002prfUAAQ",
+       "Name" => "cat",
+       "renban__c" => "201506-1078",
+       "poetry__r" => {
+         "attributes" => {
+           "type" => "poetry__c",
+           "url"  => "/services/data/v2.0/sobjects/poetry__c/b0028000002prfUAAQ"
+         },
+         "Id" => "b0028000002prfUAAQ",
+         "Name" => "dog",
+         "kajin__r" => {
+           "attributes" => {
+             "type" => "kajin__c",
+             "url"  => "/services/data/v2.0/sobjects/kajin__c/d0028000002prfUAAQ"
+           },
+           "Id" => "d0028000002prfUAAQ",
+           "Name" => "semimaru",
+         }
+       },
+       "waka__c" => {
+         "totalSize" => 1,
+         "done" => true,
+         "records" => [
+           {
+             "attributes" => {
+               "type" => "waka__c",
+               "url"  => "/services/data/v2.0/sobjects/waka__c/c0028000002prfUAAQ"
+             },
+             "Id" => "c0028000002prfUAAQ",
+             "Name" => "pony"
+           }
+         ]
+       }
+      },
+      {
+        "attributes" => {
+          "type" => "manyo__c",
+          "url" => "/services/data/v2.0/sobjects/manyo__c/a0028000002prg8AAA"
+        },
+        "Id" => "a0028000002prg8AAA",
+        "Name" => "cat5",
+        "renban__c" => "201506-1079",
+        "poetry__r" => {
+          "attributes" => {
+            "type" => "poetry__c",
+            "url"  => "/services/data/v2.0/sobjects/poetry__c/b0028000002prg8AAA"
+          },
+          "Id" => "b0028000002prg8AAA",
+          "Name" => "dog5",
+          "kajin__r" => {
+           "attributes" => {
+             "type" => "kajin__c",
+             "url"  => "/services/data/v2.0/sobjects/kajin__c/d0028000002prg8AAA"
+           },
+           "Id" => "d0028000002prg8AAA",
+           "Name" => "semimaru5",
+         }
+        },
+        "waka__c" => {
+          "totalSize" => 1,
+          "done" => true,
+          "records" => [
+            {
+              "attributes" => {
+                "type" => "waka__c",
+                "url"  => "/services/data/v2.0/sobjects/waka__c/c0028000002prg8AAA"
+              },
+              "Id" => "c0028000002prg8AAA",
+              "Name" => "pony5"
+            }
+          ]
+        }
+      }
+    ]
+
+    schema = [
+      {"name" => "Id", "type" => "string"},
+      {"name" => "Name", "type" => "string"},
+      {"name" => "renban__c", "type" => "string"},
+      {"name" => "poetry__r", "type" => "json"},
+      {"name" => "waka__c", "type" => "string"}
+    ]
+
+    expected = [
+      {
+       "Id" => "a0028000002prfUAAQ",
+       "Name" => "cat",
+       "renban__c" => "201506-1078",
+       "poetry__r" => {
+         "attributes" => {
+           "type" => "poetry__c",
+           "url"  => "/services/data/v2.0/sobjects/poetry__c/b0028000002prfUAAQ"
+         },
+         "Id" => "b0028000002prfUAAQ",
+         "Name" => "dog",
+         "kajin__r" => {
+           "attributes" => {
+             "type" => "kajin__c",
+             "url"  => "/services/data/v2.0/sobjects/kajin__c/d0028000002prfUAAQ"
+           },
+           "Id" => "d0028000002prfUAAQ",
+           "Name" => "semimaru",
+         }
+       },
+       "waka__c" => {
+         "totalSize" => 1,
+         "done" => true,
+         "records" => [
+           {
+             "attributes" => {
+               "type" => "waka__c",
+               "url"  => "/services/data/v2.0/sobjects/waka__c/c0028000002prfUAAQ"
+             },
+             "Id" => "c0028000002prfUAAQ",
+             "Name" => "pony"
+           }
+         ]
+       }
+      },
+      {
+        "Id" => "a0028000002prg8AAA",
+        "Name" => "cat5",
+        "renban__c" => "201506-1079",
+        "poetry__r" => {
+          "attributes" => {
+            "type" => "poetry__c",
+            "url"  => "/services/data/v2.0/sobjects/poetry__c/b0028000002prg8AAA"
+          },
+          "Id" => "b0028000002prg8AAA",
+          "Name" => "dog5",
+          "kajin__r" => {
+           "attributes" => {
+             "type" => "kajin__c",
+             "url"  => "/services/data/v2.0/sobjects/kajin__c/d0028000002prg8AAA"
+           },
+           "Id" => "d0028000002prg8AAA",
+           "Name" => "semimaru5",
+         }
+        },
+        "waka__c" => {
+          "totalSize" => 1,
+          "done" => true,
+          "records" => [
+            {
+              "attributes" => {
+                "type" => "waka__c",
+                "url"  => "/services/data/v2.0/sobjects/waka__c/c0028000002prg8AAA"
+              },
+              "Id" => "c0028000002prg8AAA",
+              "Name" => "pony5"
+            }
+          ]
+        }
+      }
+    ]
+
+    actual = Embulk::Input::SfdcInputPluginUtils.extract_records(json, schema)
+
+    assert_equal(expected, actual)
+  end
+
+  def test_extract_parent_elements_no_type_json
     key = "poetry__r"
 
     elements = {
@@ -183,6 +522,8 @@ class EmbulkInputPluginUtilsTest < Test::Unit::TestCase
       }
     }
 
+    type_json_columns = {}
+
     expected = {
       "poetry__r.Id" => "b0028000002prg8AAA",
       "poetry__r.Name" => "dog5",
@@ -190,7 +531,67 @@ class EmbulkInputPluginUtilsTest < Test::Unit::TestCase
       "poetry__r.kajin__r.Name" => "semimaru5"
     }
 
-    actual = Embulk::Input::SfdcInputPluginUtils.extract_parent_elements(key, elements)
+    actual = Embulk::Input::SfdcInputPluginUtils.extract_parent_elements(key, elements, type_json_columns)
+
+    assert_equal(expected, actual)
+  end
+
+  def test_extract_parent_elements_type_json
+    key = "poetry__r"
+
+    elements = {
+      "attributes" => {
+        "type" => "poetry__c",
+        "url"  => "/services/data/v2.0/sobjects/poetry__c/b0028000002prg8AAA"
+      },
+      "Id" => "b0028000002prg8AAA",
+      "Name" => "dog5",
+      "kajin__r" => {
+        "attributes" => {
+          "type" => "kajin__c",
+          "url"  => "/services/data/v2.0/sobjects/kajin__c/d0028000002prg8AAA"
+        },
+        "Id" => "d0028000002prg8AAA",
+        "Name" => "semimaru5"
+      }
+    }
+
+    type_json_columns = {
+      "poetry__r.kajin__r" => 1
+    }
+
+    expected = {
+      "poetry__r.Id" => "b0028000002prg8AAA",
+      "poetry__r.Name" => "dog5",
+      "poetry__r.kajin__r" => {
+        "attributes" => {
+          "type" => "kajin__c",
+          "url"  => "/services/data/v2.0/sobjects/kajin__c/d0028000002prg8AAA"
+        },
+        "Id" => "d0028000002prg8AAA",
+        "Name" => "semimaru5"
+      }
+    }
+
+    actual = Embulk::Input::SfdcInputPluginUtils.extract_parent_elements(key, elements, type_json_columns)
+
+    assert_equal(expected, actual)
+  end
+
+  def test_schema_to_type_json_columns
+    schema = [
+      {"name" => "Id", "type" => "string"},
+      {"name" => "Name", "type" => "string"},
+      {"name" => "renban__c", "type" => "string"},
+      {"name" => "poetry__r", "type" => "json"},
+      {"name" => "waka__c", "type" => "string"}
+    ]
+
+    expected = {
+      "poetry__r" => 1
+    }
+
+    actual = Embulk::Input::SfdcInputPluginUtils.schema_to_type_json_columns(schema)
 
     assert_equal(expected, actual)
   end

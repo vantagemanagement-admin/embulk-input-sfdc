@@ -27,17 +27,19 @@ module Embulk
       #         1. self columns
       #         2. parent's columns (follow child-to-parent relationship)
       #         3. child's columns (follow parent-to-child relationship)
-      def self.extract_records(json)
+      def self.extract_records(json, schema={})
+        type_json_columns = schema_to_type_json_columns(schema)
+
         json.map do |elements|
           record = {}
 
           elements.each {|key, value|
             if key != "attributes"
-              if value.is_a?(Hash)
-                # for parent's columns
-                if value.has_key?("attributes")
-                  record.merge!(extract_parent_elements(key, value))
-                # for child's columns or something else
+              if value.is_a?(Hash) and !schema.empty?
+                # for parent's columns (expand json)
+                if value.has_key?("attributes") and !type_json_columns.has_key?(key)
+                  record.merge!(extract_parent_elements(key, value, type_json_columns))
+                # for child's columns, parent's columns (as json) or something else
                 else
                   record[key] = value
                 end
@@ -51,23 +53,35 @@ module Embulk
         end
       end
 
-      def self.extract_parent_elements(key, elements)
+      def self.extract_parent_elements(key, elements, type_json_columns)
         record = {}
 
         elements.each{|k, v|
           full_key_name = key + '.' + k
 
-          # follow child-to-parent relationship recursivly
-          if v.is_a?(Hash)
-            if v.has_key?("attributes")
-              record.merge!(extract_parent_elements(full_key_name, v))
+          if k != "attributes"
+            if v.is_a?(Hash)
+              # for parent's columns (expand json)
+              # follow child-to-parent relationship recursivly
+              if v.has_key?("attributes") and !type_json_columns.has_key?(full_key_name)
+                record.merge!(extract_parent_elements(full_key_name, v, type_json_columns))
+              # for parent's columns (as json)
+              else
+                record[full_key_name] = v
+              end
+            # for self columns
+            else
+              record[full_key_name] = v
             end
-          else
-            record[full_key_name] = v if k != "attributes"
           end
         }
-
         record
+      end
+
+      def self.schema_to_type_json_columns(schema)
+        columns = {}
+        schema.map{|column| columns[column["name"]] = 1 if column["type"] == "json" }
+        columns
       end
     end
   end
