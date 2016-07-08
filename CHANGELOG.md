@@ -1,3 +1,6 @@
+## 0.2.2 - 2016-07-08
+* [enhancement] retrieve child-to-parent relationship columns [#45](https://github.com/treasure-data/embulk-input-sfdc/pull/45) thanks @noissefnoc
+
 ## 0.2.1 - 2016-07-06
 * [enhancement] Display log for each page fetched to avoid silence on long running job [#44](https://github.com/treasure-data/embulk-input-sfdc/pull/44)
 
