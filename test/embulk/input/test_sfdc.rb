@@ -173,7 +173,7 @@ module Embulk
           setup :setup_plugin
 
           def test_no_next
-            actual = @plugin.send(:add_next_records, {"done" => true}, 1)
+            actual = @plugin.send(:add_next_records, {"done" => true, "records" => []}, 1)
             assert_nil(actual)
           end
 
@@ -198,6 +198,7 @@ module Embulk
           def first_response
             {
               "done" => false,
+              "records" => ["foo"],
               "nextRecordsUrl" => "http://dummy.example.com/next",
             }
           end
