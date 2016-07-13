@@ -1,3 +1,6 @@
+## 0.2.3 - 2016-07-13
+* [fixed] Fix fetched count [#46](https://github.com/treasure-data/embulk-input-sfdc/pull/46)
+
 ## 0.2.2 - 2016-07-08
 * [enhancement] retrieve child-to-parent relationship columns [#45](https://github.com/treasure-data/embulk-input-sfdc/pull/45) thanks @noissefnoc
 
