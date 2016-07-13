@@ -10,7 +10,6 @@ module Embulk
 
       GUESS_RECORDS_COUNT = 30
       PREVIEW_RECORDS_COUNT = 15
-      MAX_FETCHABLE_COUNT = 2000
 
       def self.transaction(config, &control)
         task = {}
