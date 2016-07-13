@@ -125,9 +125,11 @@ module Embulk
       end
 
       def add_next_records(response, fetch_count)
+        fetched_count = 0
         loop do
+          fetched_count += response["records"].length
+          Embulk.logger.info "Fetched #{fetched_count}/#{response["totalSize"]} records."
           break if response["done"]
-          Embulk.logger.info "Fetched #{MAX_FETCHABLE_COUNT * fetch_count}/#{response["totalSize"]} records."
           next_url = response["nextRecordsUrl"]
 
           response = @retryer.with_retry do
