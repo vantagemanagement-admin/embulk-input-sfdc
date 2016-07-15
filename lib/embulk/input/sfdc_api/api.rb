@@ -94,16 +94,26 @@ module Embulk
           when 400..499
             message = "StatusCode: #{code}"
 
+            body = nil
             begin
               body = JSON.parse(response.body)
-              message << ": #{body['errorCode']}" if body["errorCode"]
-              message << ": #{body['message']}" if body["message"]
             rescue
               # Sometimes SFDC returns non-json response
               # https://github.com/treasure-data/embulk-input-sfdc/issues/35
               message << ": #{response.body}"
+              raise ConfigError.new message
             end
-            raise ConfigError.new message
+
+            message << ": #{body['errorCode']}" if body["errorCode"]
+            message << ": #{body['message']}" if body["message"]
+            case body["errorCode"]
+            when "INVALID_QUERY_LOCATOR", "QUERY_TIMEOUT"
+              # will be retried
+              raise message
+            else
+              # won't retry
+              raise ConfigError.new message
+            end
           when 500..599
             raise SfdcApi::InternalServerError, "Force.com REST API returns 500 (Internal Server Error). Please contact customer support of Force.com."
           end
