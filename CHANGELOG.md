@@ -1,3 +1,6 @@
+## 0.2.4 - 2016-07-19
+* [enhancement] Retry for some 4xx errors [#47](https://github.com/treasure-data/embulk-input-sfdc/pull/47)
+
 ## 0.2.3 - 2016-07-13
 * [fixed] Fix fetched count [#46](https://github.com/treasure-data/embulk-input-sfdc/pull/46)
 
