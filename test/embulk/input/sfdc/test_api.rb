@@ -139,6 +139,44 @@ module Embulk
 
           data do
             [
+              [
+                "INVALID_QUERY_LOCATOR",
+                {
+                  "errorCode" => "INVALID_QUERY_LOCATOR",
+                  "message" => "Unable to find query cursor data for this QueryLocator (org xxxxxxxxxxxxxxxxxx, path c/xxxxxxxxxxxxxxxxxx/3/foo/100000.cursor), please retry your query.",
+                }.to_json
+              ],
+              [
+                "QUERY_TIMEOUT",
+                {
+                  "errorCode" => "QUERY_TIMEOUT",
+                  "message" => "Your query request was running for too long.",
+                }.to_json
+              ],
+            ]
+          end
+          def test_failure_with_retriable_4xx(response_body)
+            path = "failure"
+            parameters = {"parameter" => "is not OK"}
+            response = JSON.parse(response_body)
+
+            mock(@api.client).get(path, parameters) do |res|
+              mock(res).status_code { 400 }
+              stub(res).body { response_body }
+            end
+
+            begin
+              @api.get(path, parameters)
+              assert false
+            rescue => e
+              assert_equal RuntimeError, e.class
+              assert_match response["errorCode"], e.message
+              assert_match response["message"], e.message
+            end
+          end
+
+          data do
+            [
               ["is json response", {"errorCode" => "InternalError", "message" => "error"}.to_json],
               ["is not json response", "<!doctype> this is not json"]
             ]
