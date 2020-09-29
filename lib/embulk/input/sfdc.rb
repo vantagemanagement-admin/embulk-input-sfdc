@@ -62,7 +62,7 @@ module Embulk
       end
 
       def init
-        @api = SfdcApi::Api.new.setup(task["login_url"], task["config"])
+        @api = SfdcApi::Api.new.setup(task["config"])
         @schema = task["schema"]
         @soql = task["soql"]
         @retryer = PerfectRetry.new do |config|
@@ -112,7 +112,7 @@ module Embulk
 
       def self.embulk_config_to_hash(config)
         {
-          "access_token" => config.param("access_token", :string)
+          "access_token" => config.param("access_token", :string),
           "instance_url" => config.param("instance_url", :string)
         }
       end
