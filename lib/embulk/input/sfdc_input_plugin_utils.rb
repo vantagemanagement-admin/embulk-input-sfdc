@@ -5,7 +5,7 @@ module Embulk
     module SfdcInputPluginUtils
       # Guess::SchemaGuess.from_hash_records returns Columns
       # containing 'index' key, but it is needless.
-      def self.guess_columns(sobjects)
+      def self.guess_columns(fields={}, sobjects)
         records = extract_records(sobjects["records"])
         schema = Guess::SchemaGuess.from_hash_records(records)
 
@@ -14,11 +14,14 @@ module Embulk
           column[:format] = c.format if c.format
           column
         end
+
+        schema.reject { |col| !fields.include?(col["name"]) }
       end
 
-      def self.build_soql(target, metadata)
-        target_columns = metadata["fields"].map {|fields| fields["name"] }
-        "SELECT #{target_columns.join(',')} FROM #{target}"
+      def self.build_soql(target, fields={}, metadata)
+        target_columns = metadata["fields"].map {|metadata_fields| metadata_fields["name"] }
+        filtered_columns = target_columns.reject { |col| !fields.include?(col) } 
+        "SELECT #{filtered_columns.join(',')} FROM #{target}"
       end
 
       # NOTE: Force.com query API returns JSON including

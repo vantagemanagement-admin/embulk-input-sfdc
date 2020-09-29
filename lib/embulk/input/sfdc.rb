@@ -45,18 +45,19 @@ module Embulk
       def self.guess(config)
         login_url = config.param("login_url", :string, default: SfdcApi::Api::DEFAULT_LOGIN_URL)
         target = config.param("target", :string)
+        fields = config.param("fields", :array)
 
-        api = SfdcApi::Api.new.setup(login_url, embulk_config_to_hash(config))
+        api = SfdcApi::Api.new.setup(config)
 
         metadata = api.get_metadata(target)
         raise "Target #{target} can't be searched." unless searchable_target?(metadata)
 
-        soql = SfdcInputPluginUtils.build_soql(target, metadata)
+        soql = SfdcInputPluginUtils.build_soql(target, fields, metadata)
         sobjects = api.search("#{soql} LIMIT #{GUESS_RECORDS_COUNT}")
 
         {
           "soql" => soql,
-          "columns" => SfdcInputPluginUtils.guess_columns(sobjects)
+          "columns" => SfdcInputPluginUtils.guess_columns(fields, sobjects)
         }
       end
 
@@ -111,11 +112,8 @@ module Embulk
 
       def self.embulk_config_to_hash(config)
         {
-          client_id: config.param("client_id", :string),
-          client_secret: config.param("client_secret", :string),
-          username: config.param("username", :string),
-          password: config.param("password", :string),
-          security_token: config.param("security_token", :string),
+          "access_token" => config.param("access_token", :string)
+          "instance_url" => config.param("instance_url", :string)
         }
       end
 

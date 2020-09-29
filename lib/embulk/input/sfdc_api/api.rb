@@ -11,10 +11,9 @@ module Embulk
 
         attr_reader :client
 
-        def setup(login_url, config)
-          token = authentication(login_url, config)
-          set_latest_version(token)
-          self
+        def setup(config)
+          @client.base_url = config["instance_url"]
+          set_latest_version(config["access_token"])
         end
 
         def initialize
@@ -25,7 +24,7 @@ module Embulk
 
         def get(path, parameters={})
           response = catch_unretryable_error do
-            client.get(path, parameters)
+            @client.get(path, parameters)
           end
           handle_error(response)
           JSON.parse(response.body)
