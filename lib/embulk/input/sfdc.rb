@@ -21,6 +21,7 @@ module Embulk
         task[:retry_limit] = config.param("retry_limit", :integer, default: 5)
         task[:retry_initial_wait_sec] = config.param("retry_initial_wait_sec", :integer, default: 1)
         task[:continue_from] = config.param("continue_from", :string, default: nil)
+        task[:query_type] = config.param("query_type", :string, default: "query")
 
         task[:schema] = config.param("columns", :array)
         task[:incremental] = config.param("incremental", :bool, default: true)
@@ -62,7 +63,7 @@ module Embulk
       end
 
       def init
-        @api = SfdcApi::Api.new.setup(task["login_url"], task["config"])
+        @api = SfdcApi::Api.new.setup(task[:config])
         @schema = task["schema"]
         @soql = task["soql"]
         @retryer = PerfectRetry.new do |config|
@@ -112,8 +113,9 @@ module Embulk
 
       def self.embulk_config_to_hash(config)
         {
-          "access_token" => config.param("access_token", :string)
-          "instance_url" => config.param("instance_url", :string)
+          "access_token" => config.param("access_token", :string),
+          "instance_url" => config.param("instance_url", :string),
+          "query_type" => config.param("query_type", :string, default: "query")
         }
       end
 

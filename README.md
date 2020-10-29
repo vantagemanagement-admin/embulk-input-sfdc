@@ -13,10 +13,10 @@ This plugin uses Force.com REST API.
 
 Required Embulk version >= 0.8.7
 
-* **Plugin type**: input
-* **Resume supported**: yes (since v0.1.1)
-* **Cleanup supported**: no
-* **Guess supported**: yes
+- **Plugin type**: input
+- **Resume supported**: yes (since v0.1.1)
+- **Cleanup supported**: no
+- **Guess supported**: yes
 
 ## Setup
 
@@ -39,13 +39,14 @@ This plugin requires your "security token", but if you forget it, please visit "
 - **client_id** client id for your application (string, required)
 - **client_secret** client secret for your application (string, required)
 - **security_token** your security token (string, required)
-- **login_url** your login URL  (string, required)
+- **login_url** your login URL (string, required)
 - **target** target SObject name(string, required)
 - **columns** target SObject attributes. You can generate this configuration by `guess` command (array, required)
 - **retry_initial_wait_sec**: Wait seconds for exponential backoff initial value (integer, default: 1)
 - **retry_limit**: Try to retry this times (integer, default: 5)
 - **continue_from**: Only process records after this time. This option didn't filled or SOQL SELECT-clause doesn't contain `LastModifiedDate`, all fetched records are processed. (string, default: nil)
 - **incremental**: If false, `continue_from` in next.yml would not be updated that means you always fetch all of data from SFDC with statically conditions. If true, `continue_from` would be updated in next.yml. As above you'll fetch fresh data since last executed only. (boolean, default: true)
+- **query_type**: `query` or `queryAll`. Default value is `query`. If query_type = `queryAll`, SOQL Query will be executed with deleted items. `query` will not include results that are deleted.
 
 ## Example
 

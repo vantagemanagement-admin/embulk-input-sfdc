@@ -13,6 +13,13 @@ module Embulk
 
         def setup(config)
           @client.base_url = config["instance_url"]
+
+          if config["query_type"].nil?
+            @query_type = "query"
+          else 
+            @query_type = config["query_type"]
+          end
+
           set_latest_version(config["access_token"])
         end
 
@@ -35,7 +42,7 @@ module Embulk
         end
 
         def search(soql)
-          get(@version_path.join("query").to_s, {q: soql})
+          get(@version_path.join(@query_type).to_s, {q: soql})
         end
 
         private
