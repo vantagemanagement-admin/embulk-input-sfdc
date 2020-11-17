@@ -47,6 +47,7 @@ This plugin requires your "security token", but if you forget it, please visit "
 - **continue_from**: Only process records after this time. This option didn't filled or SOQL SELECT-clause doesn't contain `LastModifiedDate`, all fetched records are processed. (string, default: nil)
 - **incremental**: If false, `continue_from` in next.yml would not be updated that means you always fetch all of data from SFDC with statically conditions. If true, `continue_from` would be updated in next.yml. As above you'll fetch fresh data since last executed only. (boolean, default: true)
 - **query_type**: `query` or `queryAll`. Default value is `query`. If query_type = `queryAll`, SOQL Query will be executed with deleted items. `query` will not include results that are deleted.
+- **soql**: Optional. If `soql` is set, then embulk will be loading data with given SOQL instead of generated based on `target` and `fields`.
 
 ## Example
 

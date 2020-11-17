@@ -53,7 +53,7 @@ module Embulk
         metadata = api.get_metadata(target)
         raise "Target #{target} can't be searched." unless searchable_target?(metadata)
 
-        soql = SfdcInputPluginUtils.build_soql(target, fields, metadata)
+        soql = config.param("soql", :string, default: SfdcInputPluginUtils.build_soql(target, fields, metadata))
         sobjects = api.search("#{soql} LIMIT #{GUESS_RECORDS_COUNT}")
 
         {
