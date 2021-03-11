@@ -7,7 +7,17 @@ module Embulk
       # containing 'index' key, but it is needless.
       def self.guess_columns(fields={}, sobjects)
         records = extract_records(sobjects["records"])
-        schema = Guess::SchemaGuess.from_hash_records(records)
+
+        # salesforce records can contain nested array, such as [{'Account' => {'Name' => 'somevalue'}}]
+        # we woud like to flatten the hash to be [{'Account.Name' => 'somevalue'}]
+        # so that from_hash_records will be correctly recognizing and guessing the value of 'Account.Name'
+        
+        flattenRecords = []
+        records.each do |item|
+          flattenRecords << flatten_hash(item)
+        end
+
+        schema = Guess::SchemaGuess.from_hash_records(flattenRecords)
 
         schema.map do |c|
           column = {name: c.name, type: c.type}
@@ -16,6 +26,18 @@ module Embulk
         end
 
         schema.reject { |col| !fields.include?(col["name"]) }
+      end
+
+      def self.flatten_hash(hash)
+        hash.each_with_object({}) do |(k, v), h|
+          if v.is_a? Hash
+            flatten_hash(v).map do |h_k, h_v|
+              h["#{k}.#{h_k}"] = h_v
+            end
+          else 
+            h[k] = v
+          end
+         end
       end
 
       def self.build_soql(target, fields={}, metadata)
